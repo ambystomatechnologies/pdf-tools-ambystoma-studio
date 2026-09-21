@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Tools Ambystoma Studio - Combinar y Cortar PDF Online</title>
+  <meta name="description" content="Une varios archivos PDF o corta y extrae páginas específicas directamente en tu navegador. 100% gratis, sin registro y totalmente privado.">
+  <meta name="theme-color" content="#090d16">
+
+  <!-- Favicon SVG idéntico al icono de marca -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos Principales -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- PDF-Lib (Manipulación y unión de PDFs en navegador) -->
+  <script src="js/vendor/pdf-lib.min.js"></script>
+
+  <!-- PDF.js de Mozilla (Para renderizado de miniaturas visuales) -->
+  <script src="js/vendor/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/vendor/pdf.worker.min.js';
+    }
+  </script>
+</head>
+<body>
+  <!-- Barra de Navegación Superior -->
+  <header class="navbar">
+    <div class="nav-container">
+      <!-- Marca a la izquierda -->
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>PDF Tools <span>Ambystoma Studio</span></h1>
+          <p>Combinar y Cortar Documentos PDF</p>
+        </div>
+      </div>
+
+      <!-- Logo en el espacio central con enlace a Instagram -->
+      <a href="https://www.instagram.com/ambystoma_technologies/" target="_blank" rel="noopener noreferrer" class="nav-center-logo" title="Visitar Ambystoma Technologies en Instagram">
+        <img src="logo.png" alt="Ambystoma Technologies" class="navbar-logo-img">
+      </a>
+
+      <!-- Botones de Acción a la derecha (About + Privacidad) -->
+      <div class="nav-actions-right">
+        <button type="button" class="btn-about" id="btn-open-about" title="Acerca de y Términos de Uso">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>About</span>
+        </button>
+
+        <div class="security-badge" title="Tus documentos no salen de tu equipo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>100% Privado</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner Publicitario Superior Móvil / Tablet (Reservado) -->
+  <aside class="ad-banner-top container-main">
+    <div class="ad-slot ad-slot-horizontal" id="ad-top-slot">
+      <!-- ========================================== -->
+      <!-- ESPACIO RESERVADO PARA PUBLICIDAD MÓVIL/TOP -->
+      <!-- Puedes pegar aquí tu código de Google AdSense: -->
+      <!-- <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-XXXXXX" data-ad-slot="XXXXXX"></ins> -->
+      <!-- ========================================== -->
+      <div class="ad-placeholder">
+        <span class="ad-label">PUBLICIDAD</span>
+        <div class="ad-inner-content">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <p>Espacio Publicitario Disponible (728x90 / Banner Móvil)</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenedor Principal con Layout en 2 Columnas (Herramienta + Publicidad Lateral) -->
+  <main class="main-layout container-main">
+    <!-- Columna Izquierda: Aplicación Principal -->
+    <div class="app-column">
+      <!-- Selector de Pestañas (Tabs) -->
+      <nav class="tabs-header" role="tablist">
+        <button class="tab-button active" id="tab-btn-merge" data-target="tab-merge" role="tab" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <span>Combinar PDFs</span>
+        </button>
+        <button class="tab-button" id="tab-btn-cut" data-target="tab-cut" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+          <span>Cortar / Dividir PDF</span>
+        </button>
+      </nav>
+
+      <!-- ============================================== -->
+      <!-- TAB 1: COMBINAR MULTIPLES PDFs                -->
+      <!-- ============================================== -->
+      <section class="tab-panel active" id="tab-merge" role="tabpanel">
+        <div class="panel-card">
+          <!-- Zona de Carga Arrastrar y Soltar -->
+          <div class="dropzone" id="merge-dropzone">
+            <input type="file" id="merge-file-input" multiple accept=".pdf,application/pdf" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              </div>
+              <h3>Arrastra tus archivos PDF aquí</h3>
+              <p>o <button type="button" class="btn-link" id="btn-browse-merge">selecciónalos desde tu dispositivo</button></p>
+              <div class="dropzone-tip">
+                <span>Puedes añadir varios archivos y organizarlos en el orden que prefieras</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de Archivos Cargados para Combinar -->
+          <div class="files-section" id="merge-files-section" style="display: none;">
+            <div class="section-header">
+              <div class="section-title">
+                <h4>Archivos seleccionados (<span id="merge-file-count">0</span>)</h4>
+                <p>Se unirán en el orden mostrado a continuación</p>
+              </div>
+              <div class="section-actions">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-add-more-merge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Añadir más
+                </button>
+                <button type="button" class="btn btn-danger-outline btn-sm" id="btn-clear-merge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  Limpiar lista
+                </button>
+              </div>
+            </div>
+
+            <!-- Lista interactiva de archivos -->
+            <ul class="file-list" id="merge-file-list" aria-label="Lista de PDFs a combinar">
+              <!-- Renderizado dinámico vía JavaScript -->
+            </ul>
+
+            <!-- Configuración de salida y botón principal -->
+            <div class="output-settings">
+              <div class="form-group">
+                <label for="merge-output-name">Nombre del archivo resultante:</label>
+                <div class="input-with-ext">
+                  <input type="text" id="merge-output-name" value="PDF_combinado" placeholder="Nombre de archivo">
+                  <span class="extension">.pdf</span>
+                </div>
+              </div>
+
+              <div class="action-footer">
+                <button type="button" class="btn btn-primary btn-lg" id="btn-do-merge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                  <span>Combinar Archivos PDF</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 2: CORTAR / DIVIDIR PDF                   -->
+      <!-- ============================================== -->
+      <section class="tab-panel" id="tab-cut" role="tabpanel">
+        <div class="panel-card">
+          <!-- Zona de Selección de Archivo Fuente -->
+          <div class="dropzone" id="cut-dropzone">
+            <input type="file" id="cut-file-input" accept=".pdf,application/pdf" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+              </div>
+              <h3>Selecciona un archivo PDF para cortar</h3>
+              <p>o <button type="button" class="btn-link" id="btn-browse-cut">explorar en tu dispositivo</button></p>
+              <div class="dropzone-tip">
+                <span>Podrás seleccionar las páginas visualmente, por rango rápido o escribiendo páginas específicas</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenido Activo de Corte de PDF -->
+          <div class="cut-content" id="cut-content-section" style="display: none;">
+            <!-- Ficha informativa del archivo cargado -->
+            <div class="file-info-banner">
+              <div class="file-info-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              </div>
+              <div class="file-info-details">
+                <h4 id="cut-file-name">documento.pdf</h4>
+                <div class="file-meta">
+                  <span class="badge" id="cut-total-pages-badge">0 páginas</span>
+                  <span class="meta-size" id="cut-file-size">0 KB</span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-change-cut-pdf">
+                Cambiar archivo
+              </button>
+            </div>
+
+            <!-- Panel de Opciones de Selección -->
+            <div class="options-box">
+              <div class="options-box-title">
+                <h5>Opciones de Selección de Páginas</h5>
+              </div>
+
+              <div class="options-grid">
+                <!-- Rango Rápido (Desde - Hasta) -->
+                <div class="range-tool-group">
+                  <label class="group-label">Rango Rápido:</label>
+                  <div class="range-inputs">
+                    <div class="input-inline">
+                      <span>Desde:</span>
+                      <input type="number" id="spin-from" min="1" value="1">
+                    </div>
+                    <div class="input-inline">
+                      <span>Hasta:</span>
+                      <input type="number" id="spin-to" min="1" value="1">
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-spin-range">
+                      Seleccionar Rango
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Expresión de Texto Personalizada -->
+                <div class="range-tool-group">
+                  <label class="group-label" for="txt-custom-range">Texto de páginas personalizadas:</label>
+                  <div class="range-inputs custom-text-input">
+                    <input type="text" id="txt-custom-range" placeholder="Ejemplo: 1-4, 7, 10-12">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-custom-range">
+                      Aplicar Texto
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botones Rápidos de Selección Global -->
+              <div class="selection-quick-bar">
+                <div class="counter-display">
+                  <span class="counter-label">Páginas seleccionadas:</span>
+                  <span class="counter-highlight" id="cut-selected-count">0</span> de <span id="cut-total-count">0</span>
+                </div>
+                <div class="quick-buttons">
+                  <button type="button" class="btn btn-chip" id="btn-select-all-pages">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Seleccionar todas
+                  </button>
+                  <button type="button" class="btn btn-chip" id="btn-deselect-all-pages">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    Deseleccionar todas
+                  </button>
+                  <button type="button" class="btn btn-chip" id="btn-invert-selection">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                    Invertir
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cuadrícula Visual de Miniaturas de Páginas -->
+            <div class="pages-grid-wrapper">
+              <div class="pages-grid-legend">
+                <span>Haz clic en cualquier página para marcarla o desmarcarla</span>
+              </div>
+              <div class="pages-grid" id="pages-grid-container">
+                <!-- Miniaturas renderizadas dinámicamente con PDF.js -->
+              </div>
+            </div>
+
+            <!-- Guardar Sección Cortada -->
+            <div class="output-settings">
+              <div class="form-group">
+                <label for="cut-output-name">Nombre del nuevo archivo PDF:</label>
+                <div class="input-with-ext">
+                  <input type="text" id="cut-output-name" value="documento_cortado" placeholder="Nombre de archivo">
+                  <span class="extension">.pdf</span>
+                </div>
+              </div>
+
+              <div class="action-footer">
+                <button type="button" class="btn btn-success btn-lg" id="btn-do-cut" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  <span>Guardar Sección Seleccionada como Nuevo PDF</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- COLUMNA DERECHA: FRANJA RESERVADA PUBLICIDAD   -->
+    <!-- (Formato Skyscraper / 300x250 o 300x600 en PC)  -->
+    <!-- ============================================== -->
+    <aside class="sidebar-column">
+      <div class="sticky-sidebar">
+        <!-- Bloque 1 de Publicidad -->
+        <div class="ad-card" id="ad-sidebar-slot-1">
+          <span class="ad-label">PUBLICIDAD</span>
+          <div class="ad-placeholder-sidebar">
+            <!-- ========================================== -->
+            <!-- ESPACIO RESERVADO PARA PUBLICIDAD LATERAL 1 -->
+            <!-- Pega aquí tu código de Google AdSense:      -->
+            <!-- <ins class="adsbygoogle"                   -->
+            <!--      style="display:block"                 -->
+            <!--      data-ad-client="ca-pub-XXXXXXXXXX"     -->
+            <!--      data-ad-slot="XXXXXXXXXX"             -->
+            <!--      data-ad-format="auto"                 -->
+            <!--      data-full-width-responsive="true"></ins> -->
+            <!-- ========================================== -->
+            <div class="ad-content-box">
+              <div class="ad-icon-ring">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </div>
+              <h4>Espacio Publicitario</h4>
+              <p>Formato recomendado: 300x250 o 300x600 (Responsive)</p>
+              <div class="ad-badge-tag">Google AdSense Ready</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Informativa / Ventajas de Privacidad -->
+        <div class="feature-card">
+          <div class="feature-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <h5>Seguridad & Velocidad</h5>
+          </div>
+          <ul class="feature-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Procesamiento 100% en tu navegador
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Tus documentos no se suben a ningún servidor
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Sin límites diarios ni registro obligatorio
+            </li>
+          </ul>
+        </div>
+
+        <!-- Bloque 2 de Publicidad Secundario (Opcional / Sticky) -->
+        <div class="ad-card" id="ad-sidebar-slot-2">
+          <span class="ad-label">PUBLICIDAD</span>
+          <div class="ad-placeholder-sidebar mini">
+            <!-- ========================================== -->
+            <!-- ESPACIO RESERVADO PARA PUBLICIDAD LATERAL 2 -->
+            <!-- ========================================== -->
+            <div class="ad-content-box">
+              <p>Banner Inferior 300x250</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Banner Publicitario Inferior Móvil (Sticky en viewport reducido) -->
+  <aside class="ad-banner-bottom">
+    <div class="ad-slot ad-slot-mobile-sticky">
+      <!-- Espacio reservado para banner móvil anclado (320x50) -->
+      <span class="ad-label">ANUNCIO</span>
+      <span class="ad-mobile-text">Espacio Publicitario Móvil 320x50</span>
+    </div>
+  </aside>
+
+  <!-- Pie de Página -->
+  <footer class="footer">
+    <div class="container-main footer-content">
+      <p>© 2026 PDF Tools Ambystoma Studio • Herramienta de código abierto alojada en GitHub Pages</p>
+      <div class="footer-links">
+        <span>Privacidad Total</span>
+        <span>•</span>
+        <span>Sin Servidor</span>
+        <span>•</span>
+        <span>Rápido & Seguro</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal / Diálogo de Progreso -->
+  <div class="modal-overlay" id="progress-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="spinner-ring"></div>
+      <h3 id="progress-title">Procesando archivo...</h3>
+      <p id="progress-desc">Por favor espera un momento mientras preparamos tu documento.</p>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal About / Información y Cláusulas Legales -->
+  <div class="modal-overlay" id="about-modal" style="display: none;">
+    <div class="modal-card modal-card-about">
+      <div class="modal-about-header">
+        <div class="about-header-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="about-icon-header">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <h3>Acerca de PDF Tools Ambystoma Studio</h3>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-about" aria-label="Cerrar modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-about-body">
+        <!-- Bloque Desarrollador -->
+        <div class="about-dev-box">
+          <div class="dev-badge">Desarrollo & Contacto</div>
+          <h4>Ambystoma Technologies</h4>
+          <p>Herramientas digitales seguras, accesibles y de alto rendimiento.</p>
+          <a href="mailto:ambystomatechnologies@gmail.com" class="about-email-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <span>ambystomatechnologies@gmail.com</span>
+          </a>
+        </div>
+
+        <!-- Bloque de Privacidad Local -->
+        <div class="about-privacy-box">
+          <div class="box-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <h5>Procesamiento 100% en tu Dispositivo</h5>
+          </div>
+          <p>Esta aplicación procesa tus archivos PDF <strong>exclusivamente dentro de la memoria de tu propio navegador web</strong>. No se utiliza ningún servidor externo, backend ni almacenamiento en la nube. Tus documentos confidenciales nunca salen de tu ordenador ni son accesibles por terceros.</p>
+        </div>
+
+        <!-- Bloque Cláusulas Legales y Propiedad Intelectual -->
+        <div class="about-legal-box">
+          <div class="box-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <h5>Términos de Uso y Exención de Responsabilidad</h5>
+          </div>
+          <p>PDF Tools Studio se distribuye únicamente como una <strong>herramienta técnica de software neutral</strong> para la organización y manipulación de archivos digitales.</p>
+          <ul>
+            <li><strong>Propiedad Intelectual:</strong> El usuario es el único y exclusivo responsable del origen, contenido, licencias y derechos de autor de cualquier documento que corte, combine, extraiga o descargue a través de esta herramienta.</li>
+            <li><strong>Liberación Total de Responsabilidad:</strong> <em>Ambystoma Technologies</em> queda total y expresamente eximida de cualquier culpa, daño, litigio, perjuicio directo o indirecto o sanción derivada del uso indebido que usuarios o terceros realicen de esta herramienta, en particular en casos de infracción a leyes de propiedad intelectual, derechos de autor, plagio o divulgación de material confidencial no autorizado.</li>
+            <li><strong>Uso "Tal Cual" (As-Is):</strong> El servicio se provee sin garantías de ninguna índole, expresas o implícitas, respecto de su adecuación para fines particulares o continuidad ininterrumpida.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-about-footer">
+        <button type="button" class="btn btn-primary" id="btn-accept-about">Comprendido y Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Notificaciones Toast -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts de la Aplicación -->
+  <script src="js/pdf-service.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
