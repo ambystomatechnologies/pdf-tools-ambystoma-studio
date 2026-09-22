@@ -278,6 +278,109 @@ const PDFService = (() => {
   }
 
   /**
+   * Genera un nuevo documento PDF combinando una lista de imágenes
+   * @param {Array} imageItems Arreglo de objetos con { getDataUrl: async () => dataUrl }
+   * @param {Object} options { pageSize: 'a4'|'letter'|'auto', orientation: 'auto'|'portrait'|'landscape', margin: 'none'|'small'|'normal' }
+   * @param {Function} onProgress Callback (current, total, percent)
+   */
+  async function imagesToPDF(imageItems, options = {}, onProgress = null) {
+    if (!window.PDFLib) {
+      throw new Error("Librería PDF-Lib no disponible.");
+    }
+    if (!imageItems || imageItems.length === 0) {
+      throw new Error("No hay imágenes seleccionadas para generar el PDF.");
+    }
+
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const total = imageItems.length;
+
+    // Dimensiones en puntos (72 dpi)
+    const PAGE_SIZES = {
+      a4: { width: 595.28, height: 841.89 },
+      letter: { width: 612.0, height: 792.0 }
+    };
+
+    const MARGINS = {
+      none: 0,
+      small: 28.35, // ~10 mm
+      normal: 56.70 // ~20 mm
+    };
+
+    const marginPt = MARGINS[options.margin] !== undefined ? MARGINS[options.margin] : 0;
+
+    for (let i = 0; i < total; i++) {
+      const item = imageItems[i];
+      if (onProgress) {
+        onProgress(i + 1, total, Math.round(((i + 1) / total) * 90));
+      }
+
+      // Obtener el Data URL de la imagen procesada (con recorte, rotación y filtro aplicados)
+      const dataUrl = await item.getDataUrl();
+      const res = await fetch(dataUrl);
+      const imgBytes = await res.arrayBuffer();
+
+      let embeddedImg;
+      if (dataUrl.startsWith("data:image/png")) {
+        embeddedImg = await pdfDoc.embedPng(imgBytes);
+      } else {
+        embeddedImg = await pdfDoc.embedJpg(imgBytes);
+      }
+
+      const imgWidth = embeddedImg.width;
+      const imgHeight = embeddedImg.height;
+
+      let targetPageWidth, targetPageHeight;
+
+      if (options.pageSize === 'auto') {
+        targetPageWidth = imgWidth + marginPt * 2;
+        targetPageHeight = imgHeight + marginPt * 2;
+      } else {
+        const stdSize = PAGE_SIZES[options.pageSize] || PAGE_SIZES.a4;
+        let isLandscape = false;
+        if (options.orientation === 'landscape') {
+          isLandscape = true;
+        } else if (options.orientation === 'portrait') {
+          isLandscape = false;
+        } else {
+          // 'auto': según dimensiones naturales de la imagen
+          isLandscape = imgWidth > imgHeight;
+        }
+
+        targetPageWidth = isLandscape ? Math.max(stdSize.width, stdSize.height) : Math.min(stdSize.width, stdSize.height);
+        targetPageHeight = isLandscape ? Math.min(stdSize.width, stdSize.height) : Math.max(stdSize.width, stdSize.height);
+      }
+
+      const page = pdfDoc.addPage([targetPageWidth, targetPageHeight]);
+
+      const availWidth = Math.max(1, targetPageWidth - marginPt * 2);
+      const availHeight = Math.max(1, targetPageHeight - marginPt * 2);
+
+      // Escalar la imagen manteniendo su proporción
+      const scale = Math.min(availWidth / imgWidth, availHeight / imgHeight);
+      const drawWidth = imgWidth * scale;
+      const drawHeight = imgHeight * scale;
+
+      // Centrar dentro de los márgenes
+      const x = marginPt + (availWidth - drawWidth) / 2;
+      const y = marginPt + (availHeight - drawHeight) / 2;
+
+      page.drawImage(embeddedImg, {
+        x: x,
+        y: y,
+        width: drawWidth,
+        height: drawHeight
+      });
+    }
+
+    if (onProgress) {
+      onProgress(total, total, 96);
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    return new Blob([pdfBytes], { type: 'application/pdf' });
+  }
+
+  /**
    * Formatea bytes a KB o MB legibles
    */
   function formatBytes(bytes, decimals = 1) {
@@ -294,6 +397,7 @@ const PDFService = (() => {
     inspectPDF,
     mergePDFs,
     splitPDF,
+    imagesToPDF,
     renderPageThumbnail,
     downloadBlob,
     formatBytes

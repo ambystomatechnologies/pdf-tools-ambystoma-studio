@@ -15,6 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     cutFile: null,  // { file, name, size, totalPages, arrayBuffer, pdfJsDoc }
     selectedPageIndices: new Set(), // Set de índices 0-based
     
+    // Tab 3: Generar PDF con Imágenes
+    img2pdfItems: [], // { id, file, name, size, imgEl, rotation, crop }
+    magicContrast: false,
+    activeCropItem: null,
+    
     // UI
     activeTab: 'tab-merge'
   };
@@ -629,6 +634,700 @@ document.addEventListener('DOMContentLoaded', () => {
       const dt = e.dataTransfer;
       if (dt && dt.files && dt.files.length > 0) {
         onDropFiles(Array.from(dt.files));
+      }
+    });
+  }
+
+  // =========================================================================
+  // TAB 3: GENERAR PDF CON IMÁGENES (CamScanner / Recorte / Contraste Mágico)
+  // =========================================================================
+  const img2pdfDropzone = document.getElementById('img2pdf-dropzone');
+  const img2pdfFileInput = document.getElementById('img2pdf-file-input');
+  const btnBrowseImg2pdf = document.getElementById('btn-browse-img2pdf');
+  const btnAddMoreImg2pdf = document.getElementById('btn-add-more-img2pdf');
+  const btnClearImg2pdf = document.getElementById('btn-clear-img2pdf');
+  const img2pdfContentSection = document.getElementById('img2pdf-content-section');
+  const img2pdfGridContainer = document.getElementById('img2pdf-grid-container');
+  const img2pdfImagesCount = document.getElementById('img2pdf-images-count');
+  const toggleMagicContrast = document.getElementById('toggle-magic-contrast');
+  const img2pdfPageSize = document.getElementById('img2pdf-page-size');
+  const img2pdfOrientation = document.getElementById('img2pdf-orientation');
+  const img2pdfMargins = document.getElementById('img2pdf-margins');
+  const img2pdfOutputName = document.getElementById('img2pdf-output-name');
+  const btnDoImg2pdf = document.getElementById('btn-do-img2pdf');
+
+  // Modal de Recorte
+  const cropModal = document.getElementById('crop-modal');
+  const cropCanvas = document.getElementById('crop-canvas');
+  const cropModalHeading = document.getElementById('crop-modal-heading');
+  const btnCloseCrop = document.getElementById('btn-close-crop');
+  const btnCropCancel = document.getElementById('btn-crop-cancel');
+  const btnCropApply = document.getElementById('btn-crop-apply');
+  const btnCropReset = document.getElementById('btn-crop-reset');
+  const btnPresetFree = document.getElementById('btn-preset-free');
+  const btnPresetA4 = document.getElementById('btn-preset-a4');
+
+  // Eventos de selección y carga de imágenes
+  if (btnBrowseImg2pdf && img2pdfFileInput) {
+    btnBrowseImg2pdf.addEventListener('click', () => img2pdfFileInput.click());
+  }
+  if (btnAddMoreImg2pdf && img2pdfFileInput) {
+    btnAddMoreImg2pdf.addEventListener('click', () => img2pdfFileInput.click());
+  }
+
+  if (img2pdfDropzone) {
+    setupDragAndDrop(img2pdfDropzone, (files) => handleImg2PdfFiles(files));
+  }
+
+  if (img2pdfFileInput) {
+    img2pdfFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleImg2PdfFiles(Array.from(e.target.files));
+        img2pdfFileInput.value = '';
+      }
+    });
+  }
+
+  // Switch de Contraste Mágico estilo CamScanner
+  if (toggleMagicContrast) {
+    toggleMagicContrast.addEventListener('click', () => {
+      state.magicContrast = !state.magicContrast;
+      toggleMagicContrast.classList.toggle('active', state.magicContrast);
+      
+      // Actualizar todas las tarjetas visuales inmediatamente
+      renderImagesGrid();
+
+      if (state.magicContrast) {
+        showToast('🪄 Contraste Mágico activado: Blanquea fondos de papel y resalta texto como CamScanner.', 'success');
+      } else {
+        showToast('Contraste Mágico desactivado: Mostrando fotos en color natural.', 'info');
+      }
+    });
+  }
+
+  // Botón Vaciar Todo
+  if (btnClearImg2pdf) {
+    btnClearImg2pdf.addEventListener('click', () => {
+      if (state.img2pdfItems.length === 0) return;
+      if (confirm('¿Deseas eliminar todas las imágenes cargadas?')) {
+        state.img2pdfItems = [];
+        renderImagesGrid();
+        showToast('Se han vaciado todas las imágenes.', 'info');
+      }
+    });
+  }
+
+  /**
+   * Algoritmo de Realce de Documento (Efecto CamScanner)
+   * Blanquea sombras de papel y fondos grises, y oscurece la tinta.
+   */
+  function applyCamScannerEffect(ctx, width, height) {
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const d = imgData.data;
+    const len = d.length;
+
+    for (let i = 0; i < len; i += 4) {
+      const r = d[i];
+      const g = d[i + 1];
+      const b = d[i + 2];
+
+      // Luminancia monocromática
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // Curva de contraste CamScanner:
+      // - Fondos de papel y sombras (> 160) se blanquean a 255 (#FFFFFF)
+      // - Texto y trazos de tinta (< 90) se intensifican a negro profundo
+      // - Transición suave entre tinta y papel
+      let out;
+      if (lum >= 165) {
+        out = 255;
+      } else if (lum <= 90) {
+        out = Math.max(0, Math.round(lum * 0.3));
+      } else {
+        const t = (lum - 90) / (165 - 90);
+        out = Math.round(t * 255);
+      }
+
+      d[i] = out;
+      d[i + 1] = out;
+      d[i + 2] = out;
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  /**
+   * Carga y procesa los archivos de imagen seleccionados
+   */
+  async function handleImg2PdfFiles(files) {
+    const validImages = files.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|bmp)$/i.test(f.name));
+    if (validImages.length === 0) {
+      showToast('Por favor selecciona archivos de imagen válidos (JPG, PNG, WebP, BMP).', 'warning');
+      return;
+    }
+
+    showProgress('Cargando imágenes...', 'Preparando tus fotos para el documento PDF.');
+
+    try {
+      for (let i = 0; i < validImages.length; i++) {
+        const file = validImages[i];
+        updateProgress(i + 1, validImages.length, Math.round(((i + 1) / validImages.length) * 100));
+
+        const item = await createImageItem(file);
+        state.img2pdfItems.push(item);
+      }
+
+      renderImagesGrid();
+      showToast(`${validImages.length} imagen(es) cargada(s) con éxito.`, 'success');
+    } catch (err) {
+      console.error('Error al cargar imágenes:', err);
+      showToast('Ocurrió un error al procesar algunas imágenes.', 'error');
+    } finally {
+      hideProgress();
+    }
+  }
+
+  /**
+   * Crea un objeto de imagen con soporte para recorte, rotación y renderizado
+   */
+  function createImageItem(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const item = {
+            id: 'img_' + Math.random().toString(36).substr(2, 9),
+            file: file,
+            name: file.name,
+            size: file.size,
+            imgEl: img,
+            rotation: 0,
+            crop: null, // { x: 0..1, y: 0..1, width: 0..1, height: 0..1 }
+            getDataUrl: function(magicContrast = state.magicContrast) {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const nw = img.naturalWidth;
+              const nh = img.naturalHeight;
+
+              const crop = this.crop || { x: 0, y: 0, width: 1, height: 1 };
+              const sx = Math.max(0, Math.round(crop.x * nw));
+              const sy = Math.max(0, Math.round(crop.y * nh));
+              const sw = Math.min(nw - sx, Math.max(1, Math.round(crop.width * nw)));
+              const sh = Math.min(nh - sy, Math.max(1, Math.round(crop.height * nh)));
+
+              const rot = (this.rotation || 0) % 360;
+              if (rot === 90 || rot === 270) {
+                canvas.width = sh;
+                canvas.height = sw;
+              } else {
+                canvas.width = sw;
+                canvas.height = sh;
+              }
+
+              ctx.save();
+              if (rot === 90) {
+                ctx.translate(canvas.width, 0);
+                ctx.rotate(Math.PI / 2);
+              } else if (rot === 180) {
+                ctx.translate(canvas.width, canvas.height);
+                ctx.rotate(Math.PI);
+              } else if (rot === 270) {
+                ctx.translate(0, canvas.height);
+                ctx.rotate((3 * Math.PI) / 2);
+              }
+
+              ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+              ctx.restore();
+
+              if (magicContrast) {
+                applyCamScannerEffect(ctx, canvas.width, canvas.height);
+              }
+
+              return canvas.toDataURL('image/jpeg', 0.92);
+            }
+          };
+          resolve(item);
+        };
+        img.onerror = () => reject(new Error(`No se pudo cargar la imagen ${file.name}`));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error(`Error de lectura en ${file.name}`));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Renderiza la galería interactiva de imágenes
+   */
+  function renderImagesGrid() {
+    if (!img2pdfGridContainer) return;
+    img2pdfGridContainer.innerHTML = '';
+
+    const count = state.img2pdfItems.length;
+    if (img2pdfImagesCount) {
+      img2pdfImagesCount.textContent = `${count} ${count === 1 ? 'imagen' : 'imágenes'}`;
+    }
+
+    if (count === 0) {
+      if (img2pdfContentSection) img2pdfContentSection.style.display = 'none';
+      if (img2pdfDropzone) img2pdfDropzone.style.display = 'block';
+      return;
+    }
+
+    if (img2pdfContentSection) img2pdfContentSection.style.display = 'block';
+    if (img2pdfDropzone) img2pdfDropzone.style.display = 'none';
+
+    state.img2pdfItems.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = `image-card ${item.crop ? 'cropped-active' : ''}`;
+      card.dataset.id = item.id;
+
+      // Encabezado de tarjeta
+      const header = document.createElement('div');
+      header.className = 'image-card-header';
+      header.innerHTML = `
+        <span class="page-num-badge">Página ${index + 1}</span>
+        <span style="font-size: 0.72rem; color: var(--text-dimmed);">${PDFService.formatBytes(item.size)}</span>
+      `;
+
+      // Contenedor de miniatura
+      const previewBox = document.createElement('div');
+      previewBox.className = 'image-card-preview-box';
+
+      const thumbImg = document.createElement('img');
+      thumbImg.className = 'image-card-thumb';
+      thumbImg.alt = `Página ${index + 1}`;
+      thumbImg.src = item.getDataUrl();
+
+      previewBox.appendChild(thumbImg);
+
+      if (item.crop) {
+        const cropTag = document.createElement('span');
+        cropTag.className = 'cropped-tag';
+        cropTag.textContent = '✂️ Recortada';
+        previewBox.appendChild(cropTag);
+      }
+
+      // Metadatos
+      const meta = document.createElement('div');
+      meta.className = 'image-card-meta';
+      meta.title = item.name;
+      meta.textContent = item.name;
+
+      // Fila de acciones por tarjeta: Recortar, Girar, Subir/Bajar, Eliminar
+      const actions = document.createElement('div');
+      actions.className = 'image-card-actions';
+
+      // 1. Botón Cortar
+      const btnCrop = document.createElement('button');
+      btnCrop.type = 'button';
+      btnCrop.className = 'btn-card-action btn-action-crop';
+      btnCrop.title = 'Cortar / Recortar bordes de esta imagen';
+      btnCrop.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>`;
+      btnCrop.addEventListener('click', () => openCropModal(item));
+
+      // 2. Botón Girar 90°
+      const btnRotate = document.createElement('button');
+      btnRotate.type = 'button';
+      btnRotate.className = 'btn-card-action';
+      btnRotate.title = 'Girar 90° a la derecha';
+      btnRotate.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>`;
+      btnRotate.addEventListener('click', () => {
+        item.rotation = (item.rotation + 90) % 360;
+        thumbImg.src = item.getDataUrl();
+        showToast(`Página ${index + 1} rotada 90°.`, 'info', 2000);
+      });
+
+      // 3. Botón Mover (arriba / abajo)
+      const btnMove = document.createElement('button');
+      btnMove.type = 'button';
+      btnMove.className = 'btn-card-action';
+      btnMove.title = index === 0 ? 'Mover hacia abajo' : 'Mover hacia arriba';
+      btnMove.innerHTML = index === 0 
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+      btnMove.addEventListener('click', () => {
+        if (index === 0 && count > 1) {
+          // Mover al siguiente
+          const temp = state.img2pdfItems[0];
+          state.img2pdfItems[0] = state.img2pdfItems[1];
+          state.img2pdfItems[1] = temp;
+        } else if (index > 0) {
+          // Mover al anterior
+          const temp = state.img2pdfItems[index];
+          state.img2pdfItems[index] = state.img2pdfItems[index - 1];
+          state.img2pdfItems[index - 1] = temp;
+        }
+        renderImagesGrid();
+      });
+
+      // 4. Botón Eliminar
+      const btnDelete = document.createElement('button');
+      btnDelete.type = 'button';
+      btnDelete.className = 'btn-card-action btn-action-delete';
+      btnDelete.title = 'Eliminar imagen';
+      btnDelete.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+      btnDelete.addEventListener('click', () => {
+        state.img2pdfItems = state.img2pdfItems.filter(i => i.id !== item.id);
+        renderImagesGrid();
+        showToast('Imagen eliminada de la lista.', 'info', 2000);
+      });
+
+      actions.appendChild(btnCrop);
+      actions.appendChild(btnRotate);
+      actions.appendChild(btnMove);
+      actions.appendChild(btnDelete);
+
+      card.appendChild(header);
+      card.appendChild(previewBox);
+      card.appendChild(meta);
+      card.appendChild(actions);
+
+      img2pdfGridContainer.appendChild(card);
+    });
+  }
+
+  // =========================================================================
+  // SISTEMA DE RECORTE INTERACTIVO (CROP MODAL)
+  // =========================================================================
+  let cropState = {
+    item: null,
+    cropX: 0.05,
+    cropY: 0.05,
+    cropW: 0.9,
+    cropH: 0.9,
+    preset: 'free', // 'free' | 'a4'
+    isDragging: false,
+    dragAction: null, // 'move' | 'nw' | 'ne' | 'se' | 'sw' | 'n' | 'e' | 's' | 'w' | 'new'
+    startX: 0,
+    startY: 0,
+    initialCrop: null,
+    canvasScale: 1
+  };
+
+  function openCropModal(item) {
+    if (!cropModal || !cropCanvas) return;
+    cropState.item = item;
+    if (cropModalHeading) cropModalHeading.textContent = `Recortar: ${item.name}`;
+
+    // Si la imagen ya tenía un recorte previo, usarlo; sino, predeterminar al 90% centrado
+    if (item.crop) {
+      cropState.cropX = item.crop.x;
+      cropState.cropY = item.crop.y;
+      cropState.cropW = item.crop.width;
+      cropState.cropH = item.crop.height;
+    } else {
+      cropState.cropX = 0.05;
+      cropState.cropY = 0.05;
+      cropState.cropW = 0.9;
+      cropState.cropH = 0.9;
+    }
+
+    cropModal.style.display = 'flex';
+    setupCropCanvas();
+  }
+
+  function closeCropModal() {
+    if (cropModal) cropModal.style.display = 'none';
+    cropState.item = null;
+  }
+
+  if (btnCloseCrop) btnCloseCrop.addEventListener('click', closeCropModal);
+  if (btnCropCancel) btnCropCancel.addEventListener('click', closeCropModal);
+
+  if (btnCropReset) {
+    btnCropReset.addEventListener('click', () => {
+      cropState.cropX = 0;
+      cropState.cropY = 0;
+      cropState.cropW = 1;
+      cropState.cropH = 1;
+      drawCropCanvas();
+    });
+  }
+
+  if (btnPresetFree && btnPresetA4) {
+    btnPresetFree.addEventListener('click', () => {
+      cropState.preset = 'free';
+      btnPresetFree.classList.add('active');
+      btnPresetA4.classList.remove('active');
+    });
+
+    btnPresetA4.addEventListener('click', () => {
+      cropState.preset = 'a4';
+      btnPresetA4.classList.add('active');
+      btnPresetFree.classList.remove('active');
+
+      // Ajustar recorte actual a proporción A4 (1 : 1.414)
+      const a4Ratio = 1 / 1.414;
+      const imgRatio = cropState.item.imgEl.naturalWidth / cropState.item.imgEl.naturalHeight;
+      let newW = cropState.cropW;
+      let newH = newW * (imgRatio / a4Ratio);
+      if (cropState.cropY + newH > 1) {
+        newH = 1 - cropState.cropY;
+        newW = newH * (a4Ratio / imgRatio);
+      }
+      cropState.cropW = Math.max(0.1, Math.min(1 - cropState.cropX, newW));
+      cropState.cropH = Math.max(0.1, Math.min(1 - cropState.cropY, newH));
+      drawCropCanvas();
+    });
+  }
+
+  if (btnCropApply) {
+    btnCropApply.addEventListener('click', () => {
+      if (!cropState.item) return;
+
+      // Normalizar coordenadas
+      const x = Math.max(0, Math.min(1, cropState.cropX));
+      const y = Math.max(0, Math.min(1, cropState.cropY));
+      const w = Math.max(0.02, Math.min(1 - x, cropState.cropW));
+      const h = Math.max(0.02, Math.min(1 - y, cropState.cropH));
+
+      // Si abarca casi el 100%, dejar en null
+      if (x < 0.01 && y < 0.01 && w > 0.98 && h > 0.98) {
+        cropState.item.crop = null;
+      } else {
+        cropState.item.crop = { x, y, width: w, height: h };
+      }
+
+      renderImagesGrid();
+      closeCropModal();
+      showToast('Recorte guardado con éxito.', 'success');
+    });
+  }
+
+  function setupCropCanvas() {
+    if (!cropCanvas || !cropState.item) return;
+    const img = cropState.item.imgEl;
+    const container = document.getElementById('crop-canvas-wrapper');
+    const maxWidth = container ? Math.min(760, container.clientWidth || 700) : 700;
+    const maxHeight = Math.min(480, window.innerHeight * 0.52);
+
+    const imgW = img.naturalWidth;
+    const imgH = img.naturalHeight;
+
+    const scale = Math.min(maxWidth / imgW, maxHeight / imgH, 1);
+    cropCanvas.width = Math.round(imgW * scale);
+    cropCanvas.height = Math.round(imgH * scale);
+    cropState.canvasScale = scale;
+
+    drawCropCanvas();
+  }
+
+  function drawCropCanvas() {
+    if (!cropCanvas || !cropState.item) return;
+    const ctx = cropCanvas.getContext('2d');
+    const img = cropState.item.imgEl;
+    const cw = cropCanvas.width;
+    const ch = cropCanvas.height;
+
+    // 1. Dibujar imagen de fondo
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, 0, 0, cw, ch);
+
+    // 2. Capa sombreada exterior al recorte
+    const rx = Math.round(cropState.cropX * cw);
+    const ry = Math.round(cropState.cropY * ch);
+    const rw = Math.round(cropState.cropW * cw);
+    const rh = Math.round(cropState.cropH * ch);
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+    ctx.fillRect(0, 0, cw, ry); // Superior
+    ctx.fillRect(0, ry + rh, cw, ch - (ry + rh)); // Inferior
+    ctx.fillRect(0, ry, rx, rh); // Izquierda
+    ctx.fillRect(rx + rw, ry, cw - (rx + rw), rh); // Derecha
+
+    // 3. Borde luminoso del área de recorte
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(rx, ry, rw, rh);
+
+    // 4. Guías de tercios (Grid)
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+
+    ctx.beginPath();
+    ctx.moveTo(rx + rw / 3, ry);
+    ctx.lineTo(rx + rw / 3, ry + rh);
+    ctx.moveTo(rx + (2 * rw) / 3, ry);
+    ctx.lineTo(rx + (2 * rw) / 3, ry + rh);
+
+    ctx.moveTo(rx, ry + rh / 3);
+    ctx.lineTo(rx + rw, ry + rh / 3);
+    ctx.moveTo(rx, ry + (2 * rh) / 3);
+    ctx.lineTo(rx + rw, ry + (2 * rh) / 3);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 5. Tiradores en esquinas (Handles)
+    const handleSize = 10;
+    ctx.fillStyle = '#38bdf8';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+
+    const corners = [
+      [rx, ry], // NW
+      [rx + rw, ry], // NE
+      [rx + rw, ry + rh], // SE
+      [rx, ry + rh] // SW
+    ];
+
+    corners.forEach(([hx, hy]) => {
+      ctx.beginPath();
+      ctx.arc(hx, hy, handleSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
+  }
+
+  // Interacción táctil y de ratón en el Canvas de Recorte
+  function getCanvasCoords(e) {
+    const rect = cropCanvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) / cropCanvas.width,
+      y: (clientY - rect.top) / cropCanvas.height
+    };
+  }
+
+  function onCropPointerDown(e) {
+    if (!cropState.item) return;
+    const { x, y } = getCanvasCoords(e);
+    const cw = cropCanvas.width;
+    const ch = cropCanvas.height;
+
+    const rx = cropState.cropX;
+    const ry = cropState.cropY;
+    const rw = cropState.cropW;
+    const rh = cropState.cropH;
+
+    const thresholdX = 16 / cw;
+    const thresholdY = 16 / ch;
+
+    cropState.isDragging = true;
+    cropState.startX = x;
+    cropState.startY = y;
+    cropState.initialCrop = { x: rx, y: ry, w: rw, h: rh };
+
+    // Determinar zona de arrastre (esquinas, bordes o interior)
+    if (Math.abs(x - rx) < thresholdX && Math.abs(y - ry) < thresholdY) {
+      cropState.dragAction = 'nw';
+    } else if (Math.abs(x - (rx + rw)) < thresholdX && Math.abs(y - ry) < thresholdY) {
+      cropState.dragAction = 'ne';
+    } else if (Math.abs(x - (rx + rw)) < thresholdX && Math.abs(y - (ry + rh)) < thresholdY) {
+      cropState.dragAction = 'se';
+    } else if (Math.abs(x - rx) < thresholdX && Math.abs(y - (ry + rh)) < thresholdY) {
+      cropState.dragAction = 'sw';
+    } else if (x >= rx && x <= rx + rw && y >= ry && y <= ry + rh) {
+      cropState.dragAction = 'move';
+    } else {
+      // Iniciar un nuevo recuadro de recorte desde el clic
+      cropState.dragAction = 'new';
+      cropState.cropX = x;
+      cropState.cropY = y;
+      cropState.cropW = 0.05;
+      cropState.cropH = 0.05;
+    }
+  }
+
+  function onCropPointerMove(e) {
+    if (!cropState.isDragging || !cropState.item) return;
+    const { x, y } = getCanvasCoords(e);
+    const dx = x - cropState.startX;
+    const dy = y - cropState.startY;
+    const init = cropState.initialCrop;
+
+    if (cropState.dragAction === 'move') {
+      cropState.cropX = Math.max(0, Math.min(1 - init.w, init.x + dx));
+      cropState.cropY = Math.max(0, Math.min(1 - init.h, init.y + dy));
+    } else if (cropState.dragAction === 'se') {
+      cropState.cropW = Math.max(0.05, Math.min(1 - init.x, init.w + dx));
+      cropState.cropH = Math.max(0.05, Math.min(1 - init.y, init.h + dy));
+    } else if (cropState.dragAction === 'nw') {
+      const newX = Math.max(0, Math.min(init.x + init.w - 0.05, init.x + dx));
+      const newY = Math.max(0, Math.min(init.y + init.h - 0.05, init.y + dy));
+      cropState.cropW = init.w + (init.x - newX);
+      cropState.cropH = init.h + (init.y - newY);
+      cropState.cropX = newX;
+      cropState.cropY = newY;
+    } else if (cropState.dragAction === 'ne') {
+      const newY = Math.max(0, Math.min(init.y + init.h - 0.05, init.y + dy));
+      cropState.cropW = Math.max(0.05, Math.min(1 - init.x, init.w + dx));
+      cropState.cropH = init.h + (init.y - newY);
+      cropState.cropY = newY;
+    } else if (cropState.dragAction === 'sw') {
+      const newX = Math.max(0, Math.min(init.x + init.w - 0.05, init.x + dx));
+      cropState.cropW = init.w + (init.x - newX);
+      cropState.cropH = Math.max(0.05, Math.min(1 - init.y, init.h + dy));
+      cropState.cropX = newX;
+    } else if (cropState.dragAction === 'new') {
+      cropState.cropX = Math.min(cropState.startX, x);
+      cropState.cropY = Math.min(cropState.startY, y);
+      cropState.cropW = Math.max(0.05, Math.abs(x - cropState.startX));
+      cropState.cropH = Math.max(0.05, Math.abs(y - cropState.startY));
+    }
+
+    drawCropCanvas();
+  }
+
+  function onCropPointerUp() {
+    cropState.isDragging = false;
+    cropState.dragAction = null;
+  }
+
+  if (cropCanvas) {
+    cropCanvas.addEventListener('mousedown', onCropPointerDown);
+    window.addEventListener('mousemove', onCropPointerMove);
+    window.addEventListener('mouseup', onCropPointerUp);
+
+    cropCanvas.addEventListener('touchstart', onCropPointerDown, { passive: true });
+    window.addEventListener('touchmove', onCropPointerMove, { passive: true });
+    window.addEventListener('touchend', onCropPointerUp);
+  }
+
+  // =========================================================================
+  // ACCIÓN PRINCIPAL: GENERAR Y DESCARGAR PDF CON IMÁGENES
+  // =========================================================================
+  if (btnDoImg2pdf) {
+    btnDoImg2pdf.addEventListener('click', async () => {
+      if (state.img2pdfItems.length === 0) {
+        showToast('Debes añadir al menos una imagen para generar el PDF.', 'warning');
+        return;
+      }
+
+      let fileName = (img2pdfOutputName ? img2pdfOutputName.value.trim() : '') || 'documento_imagenes_ambystoma';
+      if (!fileName.toLowerCase().endsWith('.pdf')) {
+        fileName += '.pdf';
+      }
+
+      const options = {
+        pageSize: img2pdfPageSize ? img2pdfPageSize.value : 'a4',
+        orientation: img2pdfOrientation ? img2pdfOrientation.value : 'auto',
+        margin: img2pdfMargins ? img2pdfMargins.value : 'none',
+        magicContrast: state.magicContrast
+      };
+
+      showProgress(
+        'Generando documento PDF...',
+        state.magicContrast 
+          ? 'Aplicando realce de contraste CamScanner e incrustando imágenes en alta definición...' 
+          : 'Compilando tus imágenes en un documento PDF de alta calidad...'
+      );
+
+      try {
+        const pdfBlob = await PDFService.imagesToPDF(state.img2pdfItems, options, (current, total, pct) => {
+          updateProgress(current, total, pct);
+        });
+
+        PDFService.downloadBlob(pdfBlob, fileName);
+        showToast(`✓ "${fileName}" generado y descargado exitosamente.`, 'success', 4500);
+      } catch (err) {
+        console.error('Error al generar PDF de imágenes:', err);
+        showToast(err.message || 'Error al compilar el PDF de imágenes.', 'error');
+      } finally {
+        hideProgress();
       }
     });
   }

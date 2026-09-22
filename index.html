@@ -18,6 +18,9 @@
   <!-- Estilos Principales -->
   <link rel="stylesheet" href="css/style.css">
 
+  <!-- Google AdSense Oficial Ambystoma Technologies -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5786595894984320" crossorigin="anonymous"></script>
+
   <!-- PDF-Lib (Manipulación y unión de PDFs en navegador) -->
   <script src="js/vendor/pdf-lib.min.js"></script>
 
@@ -46,7 +49,7 @@
         </div>
         <div class="brand-text">
           <h1>PDF Tools <span>Ambystoma Studio</span></h1>
-          <p>Combinar y Cortar Documentos PDF</p>
+          <p>Combinar, Cortar y Crear PDF con Imágenes</p>
         </div>
       </div>
 
@@ -76,21 +79,18 @@
     </div>
   </header>
 
-  <!-- Banner Publicitario Superior Móvil / Tablet (Reservado) -->
+  <!-- Banner Publicitario Superior Oficial (Google AdSense) -->
   <aside class="ad-banner-top container-main">
     <div class="ad-slot ad-slot-horizontal" id="ad-top-slot">
-      <!-- ========================================== -->
-      <!-- ESPACIO RESERVADO PARA PUBLICIDAD MÓVIL/TOP -->
-      <!-- Puedes pegar aquí tu código de Google AdSense: -->
-      <!-- <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-XXXXXX" data-ad-slot="XXXXXX"></ins> -->
-      <!-- ========================================== -->
-      <div class="ad-placeholder">
-        <span class="ad-label">PUBLICIDAD</span>
-        <div class="ad-inner-content">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-          <p>Espacio Publicitario Disponible (728x90 / Banner Móvil)</p>
-        </div>
-      </div>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-5786595894984320"
+           data-ad-slot="auto"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
     </div>
   </aside>
 
@@ -107,6 +107,10 @@
         <button class="tab-button" id="tab-btn-cut" data-target="tab-cut" role="tab" aria-selected="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
           <span>Cortar / Dividir PDF</span>
+        </button>
+        <button class="tab-button" id="tab-btn-img2pdf" data-target="tab-img2pdf" role="tab" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <span>Generar PDF con Imágenes</span>
         </button>
       </nav>
 
@@ -304,36 +308,142 @@
           </div>
         </div>
       </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 3: GENERAR PDF CON IMÁGENES (CamScanner)   -->
+      <!-- ============================================== -->
+      <section class="tab-panel" id="tab-img2pdf" role="tabpanel">
+        <div class="panel-card">
+          <!-- Zona de Carga Arrastrar y Soltar Imágenes -->
+          <div class="dropzone" id="img2pdf-dropzone">
+            <input type="file" id="img2pdf-file-input" multiple accept="image/jpeg,image/png,image/webp,image/bmp,.jpg,.jpeg,.png,.webp,.bmp" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              </div>
+              <h3>Arrastra tus fotos o imágenes aquí</h3>
+              <p>Formatos soportados: JPG, PNG, WebP, BMP (Puedes seleccionar múltiples imágenes a la vez)</p>
+              <button type="button" class="btn btn-primary" id="btn-browse-img2pdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Seleccionar Imágenes</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido de Gestión de Imágenes (Oculto al inicio) -->
+          <div class="content-section" id="img2pdf-content-section" style="display: none;">
+            <!-- Barra de Herramientas y Switch CamScanner -->
+            <div class="img2pdf-toolbar">
+              <div class="img2pdf-toolbar-group">
+                <!-- Switch de Contraste Mágico estilo CamScanner -->
+                <div class="magic-contrast-switch-box" id="toggle-magic-contrast" title="Activa o desactiva el realce de documento escaneado (blanquea fondos y oscurece texto)">
+                  <div class="magic-switch-toggle">
+                    <div class="magic-switch-handle"></div>
+                  </div>
+                  <div class="magic-switch-info">
+                    <span class="magic-switch-title">🪄 Contraste Mágico</span>
+                    <span class="magic-switch-desc">Efecto CamScanner (blanquea papel)</span>
+                  </div>
+                </div>
+
+                <!-- Opciones de Página -->
+                <div class="page-options-row">
+                  <div class="opt-inline-group">
+                    <label for="img2pdf-page-size">Tamaño:</label>
+                    <select id="img2pdf-page-size" class="select-styled">
+                      <option value="a4" selected>A4 (210 × 297 mm)</option>
+                      <option value="letter">Carta / Letter</option>
+                      <option value="auto">Ajustar a Imagen</option>
+                    </select>
+                  </div>
+
+                  <div class="opt-inline-group">
+                    <label for="img2pdf-orientation">Orientación:</label>
+                    <select id="img2pdf-orientation" class="select-styled">
+                      <option value="auto" selected>Automática</option>
+                      <option value="portrait">Vertical</option>
+                      <option value="landscape">Horizontal</option>
+                    </select>
+                  </div>
+
+                  <div class="opt-inline-group">
+                    <label for="img2pdf-margins">Márgenes:</label>
+                    <select id="img2pdf-margins" class="select-styled">
+                      <option value="none" selected>Sin margen (0)</option>
+                      <option value="small">Pequeño (10 mm)</option>
+                      <option value="normal">Normal (20 mm)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botones Rápidos -->
+              <div class="toolbar-actions-right">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-add-more-img2pdf">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <span>Añadir Fotos</span>
+                </button>
+                <button type="button" class="btn btn-danger-outline btn-sm" id="btn-clear-img2pdf">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Vaciar Todo</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Resumen de Páginas -->
+            <div class="selection-summary-bar">
+              <div class="selection-badge">
+                <span id="img2pdf-images-count">0 imágenes</span> preparadas para el PDF
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-dimmed); margin: 0;">
+                💡 Puedes cortar o rotar cada imagen individualmente antes de generar el PDF.
+              </p>
+            </div>
+
+            <!-- Grid de Imágenes Cargadas -->
+            <div class="images-grid" id="img2pdf-grid-container"></div>
+
+            <!-- Ajustes de Salida y Generación de PDF -->
+            <div class="output-settings">
+              <div class="form-group">
+                <label for="img2pdf-output-name">Nombre personalizado para el archivo PDF final:</label>
+                <div class="input-with-ext">
+                  <input type="text" id="img2pdf-output-name" value="documento_imagenes_ambystoma" placeholder="nombre_del_documento">
+                  <span class="extension">.pdf</span>
+                </div>
+              </div>
+
+              <div class="action-footer">
+                <button type="button" class="btn btn-success btn-lg" id="btn-do-img2pdf">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <span>Generar y Descargar PDF con Imágenes</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- ============================================== -->
-    <!-- COLUMNA DERECHA: FRANJA RESERVADA PUBLICIDAD   -->
-    <!-- (Formato Skyscraper / 300x250 o 300x600 en PC)  -->
+    <!-- COLUMNA DERECHA: FRANJA OFICIAL PUBLICIDAD     -->
+    <!-- (Google AdSense Skyscraper / Responsive)       -->
     <!-- ============================================== -->
     <aside class="sidebar-column">
       <div class="sticky-sidebar">
-        <!-- Bloque 1 de Publicidad -->
+        <!-- Bloque 1 de Publicidad Oficial -->
         <div class="ad-card" id="ad-sidebar-slot-1">
           <span class="ad-label">PUBLICIDAD</span>
-          <div class="ad-placeholder-sidebar">
-            <!-- ========================================== -->
-            <!-- ESPACIO RESERVADO PARA PUBLICIDAD LATERAL 1 -->
-            <!-- Pega aquí tu código de Google AdSense:      -->
-            <!-- <ins class="adsbygoogle"                   -->
-            <!--      style="display:block"                 -->
-            <!--      data-ad-client="ca-pub-XXXXXXXXXX"     -->
-            <!--      data-ad-slot="XXXXXXXXXX"             -->
-            <!--      data-ad-format="auto"                 -->
-            <!--      data-full-width-responsive="true"></ins> -->
-            <!-- ========================================== -->
-            <div class="ad-content-box">
-              <div class="ad-icon-ring">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-              </div>
-              <h4>Espacio Publicitario</h4>
-              <p>Formato recomendado: 300x250 o 300x600 (Responsive)</p>
-              <div class="ad-badge-tag">Google AdSense Ready</div>
-            </div>
+          <div style="padding: 0.5rem; text-align: center;">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-5786595894984320"
+                 data-ad-slot="auto"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
           </div>
         </div>
 
@@ -359,28 +469,36 @@
           </ul>
         </div>
 
-        <!-- Bloque 2 de Publicidad Secundario (Opcional / Sticky) -->
+        <!-- Bloque 2 de Publicidad Secundario Oficial -->
         <div class="ad-card" id="ad-sidebar-slot-2">
           <span class="ad-label">PUBLICIDAD</span>
-          <div class="ad-placeholder-sidebar mini">
-            <!-- ========================================== -->
-            <!-- ESPACIO RESERVADO PARA PUBLICIDAD LATERAL 2 -->
-            <!-- ========================================== -->
-            <div class="ad-content-box">
-              <p>Banner Inferior 300x250</p>
-            </div>
+          <div style="padding: 0.5rem; text-align: center;">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-5786595894984320"
+                 data-ad-slot="auto"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
           </div>
         </div>
       </div>
     </aside>
   </main>
 
-  <!-- Banner Publicitario Inferior Móvil (Sticky en viewport reducido) -->
+  <!-- Banner Publicitario Inferior Móvil Oficial -->
   <aside class="ad-banner-bottom">
     <div class="ad-slot ad-slot-mobile-sticky">
-      <!-- Espacio reservado para banner móvil anclado (320x50) -->
-      <span class="ad-label">ANUNCIO</span>
-      <span class="ad-mobile-text">Espacio Publicitario Móvil 320x50</span>
+      <span class="ad-label">PUBLICIDAD</span>
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:320px;height:50px"
+           data-ad-client="ca-pub-5786595894984320"
+           data-ad-slot="auto"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
     </div>
   </aside>
 
@@ -463,6 +581,45 @@
 
       <div class="modal-about-footer">
         <button type="button" class="btn btn-primary" id="btn-accept-about">Comprendido y Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Recorte Interactivo (Crop Modal) -->
+  <div class="modal-overlay" id="crop-modal" style="display: none;">
+    <div class="crop-modal-card">
+      <div class="crop-modal-header">
+        <div class="crop-modal-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+          <span id="crop-modal-heading">Recortar Imagen de Página</span>
+        </div>
+        <button type="button" class="btn-close-modal" id="btn-close-crop" aria-label="Cerrar recorte">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="crop-modal-body">
+        <div class="crop-canvas-wrapper" id="crop-canvas-wrapper">
+          <canvas id="crop-canvas"></canvas>
+        </div>
+        <div class="crop-instructions">
+          Arrastra el recuadro o sus esquinas sobre el documento para definir el área de corte deseada.
+        </div>
+      </div>
+
+      <div class="crop-modal-footer">
+        <div class="crop-presets">
+          <button type="button" class="btn-crop-preset active" data-preset="free" id="btn-preset-free">Libre</button>
+          <button type="button" class="btn-crop-preset" data-preset="a4" id="btn-preset-a4">Proporción A4</button>
+          <button type="button" class="btn-crop-preset" id="btn-crop-reset">Imagen Completa</button>
+        </div>
+        <div class="crop-footer-actions">
+          <button type="button" class="btn btn-secondary" id="btn-crop-cancel">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-crop-apply">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Aplicar Recorte</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
