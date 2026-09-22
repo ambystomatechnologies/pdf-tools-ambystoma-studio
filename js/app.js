@@ -883,17 +883,35 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = `image-card ${item.crop ? 'cropped-active' : ''}`;
       card.dataset.id = item.id;
 
-      // Encabezado de tarjeta
+      // Encabezado de tarjeta con botón de tijeras destacado
       const header = document.createElement('div');
       header.className = 'image-card-header';
       header.innerHTML = `
-        <span class="page-num-badge">Página ${index + 1}</span>
-        <span style="font-size: 0.72rem; color: var(--text-dimmed);">${PDFService.formatBytes(item.size)}</span>
+        <div class="image-card-header-left">
+          <span class="page-num-badge">Pág ${index + 1}</span>
+          <span style="font-size: 0.72rem; color: var(--text-dimmed);">${PDFService.formatBytes(item.size)}</span>
+        </div>
       `;
 
-      // Contenedor de miniatura
+      // Botón de tijeras en la cabecera junto a la imagen
+      const btnHeaderCrop = document.createElement('button');
+      btnHeaderCrop.type = 'button';
+      btnHeaderCrop.className = 'btn-card-crop-badge';
+      btnHeaderCrop.title = 'Cortar / Recortar esta imagen';
+      btnHeaderCrop.innerHTML = `
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+        <span>Cortar ✂️</span>
+      `;
+      btnHeaderCrop.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCropModal(item);
+      });
+      header.appendChild(btnHeaderCrop);
+
+      // Contenedor de miniatura interactiva
       const previewBox = document.createElement('div');
       previewBox.className = 'image-card-preview-box';
+      previewBox.title = 'Haz clic para cortar / recortar imagen';
 
       const thumbImg = document.createElement('img');
       thumbImg.className = 'image-card-thumb';
@@ -901,6 +919,23 @@ document.addEventListener('DOMContentLoaded', () => {
       thumbImg.src = item.getDataUrl();
 
       previewBox.appendChild(thumbImg);
+
+      // Botón flotante de tijeras directamente sobre la imagen
+      const overlayCropBtn = document.createElement('button');
+      overlayCropBtn.type = 'button';
+      overlayCropBtn.className = 'thumb-crop-overlay-btn';
+      overlayCropBtn.title = 'Cortar / Recortar esta imagen';
+      overlayCropBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+        <span>Cortar</span>
+      `;
+      overlayCropBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCropModal(item);
+      });
+      previewBox.appendChild(overlayCropBtn);
+
+      previewBox.addEventListener('click', () => openCropModal(item));
 
       if (item.crop) {
         const cropTag = document.createElement('span');
@@ -919,13 +954,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const actions = document.createElement('div');
       actions.className = 'image-card-actions';
 
-      // 1. Botón Cortar
+      // 1. Botón Cortar con tijeras destacado
       const btnCrop = document.createElement('button');
       btnCrop.type = 'button';
       btnCrop.className = 'btn-card-action btn-action-crop';
       btnCrop.title = 'Cortar / Recortar bordes de esta imagen';
-      btnCrop.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>`;
-      btnCrop.addEventListener('click', () => openCropModal(item));
+      btnCrop.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg><span class="btn-action-text">Cortar</span>`;
+      btnCrop.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCropModal(item);
+      });
 
       // 2. Botón Girar 90°
       const btnRotate = document.createElement('button');
@@ -1282,8 +1320,18 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('mousemove', onCropPointerMove);
     window.addEventListener('mouseup', onCropPointerUp);
 
-    cropCanvas.addEventListener('touchstart', onCropPointerDown, { passive: true });
-    window.addEventListener('touchmove', onCropPointerMove, { passive: true });
+    cropCanvas.addEventListener('touchstart', (e) => {
+      onCropPointerDown(e);
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (cropState.isDragging) {
+        if (e.cancelable) e.preventDefault();
+        onCropPointerMove(e);
+      }
+    }, { passive: false });
+
     window.addEventListener('touchend', onCropPointerUp);
   }
 
