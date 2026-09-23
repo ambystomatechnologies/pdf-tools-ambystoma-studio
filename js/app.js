@@ -1413,4 +1413,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Redirección infalible al sitio oficial Ambystoma Technologies
+  document.querySelectorAll('.brand, .nav-center-logo, .navbar-logo-img, .brand-text, .brand-icon').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'https://ambystomatechnologies.github.io/';
+    });
+  });
 });

@@ -37,7 +37,7 @@
   <header class="navbar">
     <div class="nav-container">
       <!-- Marca a la izquierda -->
-      <div class="brand">
+      <a href="https://ambystomatechnologies.github.io/" class="brand" title="Ambystoma Technologies - Ir al sitio principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="text-decoration: none; color: inherit; cursor: pointer;">
         <div class="brand-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -51,11 +51,11 @@
           <h1>PDF Tools <span>Ambystoma Studio</span></h1>
           <p>Combinar, Cortar y Crear PDF con Imágenes</p>
         </div>
-      </div>
+      </a>
 
       <!-- Logo en el espacio central con enlace a https://ambystomatechnologies.github.io/ -->
-      <a href="https://ambystomatechnologies.github.io/" target="_blank" rel="noopener noreferrer" class="nav-center-logo" title="Ambystoma Technologies - Ir al sitio principal">
-        <img src="logo.png" alt="Ambystoma Technologies" class="navbar-logo-img">
+      <a href="https://ambystomatechnologies.github.io/" class="nav-center-logo" title="Ambystoma Technologies - Ir al sitio principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="cursor: pointer; text-decoration: none;">
+        <img src="logo.png" alt="Ambystoma Technologies" class="navbar-logo-img" style="cursor: pointer; pointer-events: auto;">
       </a>
 
       <!-- Botones de Acción a la derecha (About + Privacidad) -->
@@ -539,7 +539,10 @@
 
       <div class="modal-about-body">
         <!-- Bloque Desarrollador -->
-        <div class="about-dev-box">
+        <div class="about-dev-box" style="text-align: center;">
+          <a href="https://ambystomatechnologies.github.io/" title="Ambystoma Technologies - Ir al sitio principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="cursor: pointer; display: inline-block; text-decoration: none;">
+            <img src="logo.png" alt="Ambystoma Technologies" style="max-height: 48px; max-width: 80%; object-fit: contain; margin-bottom: 0.75rem; cursor: pointer;">
+          </a>
           <div class="dev-badge">Desarrollo & Contacto</div>
           <h4>Ambystoma Technologies</h4>
           <p>Herramientas digitales seguras, accesibles y de alto rendimiento.</p>
