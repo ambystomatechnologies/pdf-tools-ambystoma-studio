@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Tools Ambystoma Studio · Combinar y Cortar PDF Online Gratis · 100% Gratuito</title>
-  <meta name="description" content="Une varios archivos PDF, corta y extrae páginas o crea PDF con imágenes gratis online. Herramienta 100% gratuita, sin límites, sin registro y totalmente privada desarrollada por Ambystoma Technologies.">
-  <meta name="keywords" content="combinar pdf gratis, unir pdf gratis, cortar pdf gratis, separar pdf gratis, pdf tools 100% gratuito, editar pdf gratis online, juntar pdf gratis, ambystoma technologies">
+  <title data-i18n="pageTitle">PDF Tools Ambystoma Studio · Merge and Cut PDF Online Free · 100% Free</title>
+  <meta name="description" content="Merge multiple PDF files, cut and extract pages or create PDF from images free online. 100% free tool, no limits, no registration and completely private by Ambystoma Technologies.">
+  <meta name="keywords" content="merge pdf free, combine pdf, cut pdf free, split pdf free, pdf tools free online, ambystoma technologies, pdf image converter">
   <meta name="author" content="Ambystoma Technologies">
   <meta name="theme-color" content="#090d16">
 
@@ -61,7 +61,7 @@
   <header class="navbar">
     <div class="nav-container">
       <!-- Marca a la izquierda -->
-      <a href="https://ambystomatechnologies.github.io/" class="brand" title="Ambystoma Technologies - Ir al sitio principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="text-decoration: none; color: inherit; cursor: pointer;">
+      <a href="https://ambystomatechnologies.github.io/" class="brand" title="Ambystoma Technologies" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="text-decoration: none; color: inherit; cursor: pointer;">
         <div class="brand-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -72,32 +72,79 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1>PDF Tools <span>Ambystoma Studio</span></h1>
-          <p>Combinar, Cortar y Crear PDF con Imágenes</p>
+          <h1 data-i18n="brandTitle">PDF Tools <span>Ambystoma Studio</span></h1>
+          <p data-i18n="brandDesc">Merge, Cut and Create PDF with Images</p>
         </div>
       </a>
 
       <!-- Logo en el espacio central con enlace a https://ambystomatechnologies.github.io/ -->
-      <a href="https://ambystomatechnologies.github.io/" class="nav-center-logo" title="Ambystoma Technologies - Ir al sitio principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="cursor: pointer; text-decoration: none;">
+      <a href="https://ambystomatechnologies.github.io/" class="nav-center-logo" title="Ambystoma Technologies" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="cursor: pointer; text-decoration: none;">
         <img src="logo.png" alt="Ambystoma Technologies" class="navbar-logo-img" style="cursor: pointer; pointer-events: auto;">
       </a>
 
-      <!-- Botones de Acción a la derecha (About + Privacidad) -->
+      <!-- Botones de Acción a la derecha (Selector de Idiomas + About + Privacidad) -->
       <div class="nav-actions-right">
-        <button type="button" class="btn-about" id="btn-open-about" title="Acerca de y Términos de Uso">
+        <!-- Selector de Idiomas con Banderas Circulares -->
+        <div class="lang-switch" role="group" aria-label="Language selector">
+          <!-- Bandera US (Inglés - Default) -->
+          <button type="button" class="lang-btn active" id="btn-lang-en" onclick="setLanguage('en')" title="English" aria-label="English">
+            <svg viewBox="0 0 32 32" width="26" height="26">
+              <clipPath id="pdftools-flag-us"><circle cx="16" cy="16" r="16"/></clipPath>
+              <g clip-path="url(#pdftools-flag-us)">
+                <rect width="32" height="32" fill="#b22234"/>
+                <path d="M0 4.92h32M0 9.85h32M0 14.77h32M0 19.69h32M0 24.62h32M0 29.54h32" stroke="#ffffff" stroke-width="2.46"/>
+                <rect width="14" height="17.23" fill="#3c3b6e"/>
+                <g fill="#ffffff">
+                  <circle cx="3" cy="3" r="0.9"/>
+                  <circle cx="7" cy="3" r="0.9"/>
+                  <circle cx="11" cy="3" r="0.9"/>
+                  <circle cx="5" cy="6" r="0.9"/>
+                  <circle cx="9" cy="6" r="0.9"/>
+                  <circle cx="3" cy="9" r="0.9"/>
+                  <circle cx="7" cy="9" r="0.9"/>
+                  <circle cx="11" cy="9" r="0.9"/>
+                  <circle cx="5" cy="12" r="0.9"/>
+                  <circle cx="9" cy="12" r="0.9"/>
+                  <circle cx="3" cy="15" r="0.9"/>
+                  <circle cx="7" cy="15" r="0.9"/>
+                  <circle cx="11" cy="15" r="0.9"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+
+          <!-- Bandera España (Español) -->
+          <button type="button" class="lang-btn" id="btn-lang-es" onclick="setLanguage('es')" title="Español" aria-label="Español">
+            <svg viewBox="0 0 32 32" width="26" height="26">
+              <clipPath id="pdftools-flag-es"><circle cx="16" cy="16" r="16"/></clipPath>
+              <g clip-path="url(#pdftools-flag-es)">
+                <rect width="32" height="32" fill="#aa151b"/>
+                <rect y="8" width="32" height="16" fill="#f1bf00"/>
+                <g transform="translate(6.5, 10.5) scale(0.68)">
+                  <path d="M4 1h8v6c0 3-4 5-4 5s-4-2-4-5V1z" fill="#aa151b" stroke="#f1bf00" stroke-width="0.8"/>
+                  <circle cx="8" cy="3" r="1.3" fill="#f1bf00"/>
+                  <rect x="2" y="2" width="1.2" height="9" fill="#94a3b8"/>
+                  <rect x="12.8" y="2" width="1.2" height="9" fill="#94a3b8"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </div>
+
+        <button type="button" class="btn-about" id="btn-open-about" title="About and Terms of Use" data-i18n-title="btnAboutTitle">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          <span>About</span>
+          <span data-i18n="btnAbout">About</span>
         </button>
 
-        <div class="security-badge" title="Tus documentos no salen de tu equipo">
+        <div class="security-badge" title="Your documents never leave your computer" data-i18n-title="securityBadgeTitle">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
           </svg>
-          <span>100% Privado</span>
+          <span data-i18n="securityBadgeText">100% Private</span>
         </div>
       </div>
     </div>
@@ -126,15 +173,15 @@
       <nav class="tabs-header" role="tablist">
         <button class="tab-button active" id="tab-btn-merge" data-target="tab-merge" role="tab" aria-selected="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-          <span>Combinar PDFs</span>
+          <span data-i18n="tabMerge">Merge PDFs</span>
         </button>
         <button class="tab-button" id="tab-btn-cut" data-target="tab-cut" role="tab" aria-selected="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
-          <span>Cortar / Dividir PDF</span>
+          <span data-i18n="tabCut">Cut / Split PDF</span>
         </button>
         <button class="tab-button tab-button-full" id="tab-btn-img2pdf" data-target="tab-img2pdf" role="tab" aria-selected="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-          <span>Generar PDF con Imágenes</span>
+          <span data-i18n="tabImg2Pdf">Create PDF with Images</span>
         </button>
       </nav>
 
@@ -150,10 +197,10 @@
               <div class="dropzone-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               </div>
-              <h3>Arrastra tus archivos PDF aquí</h3>
-              <p>o <button type="button" class="btn-link" id="btn-browse-merge">selecciónalos desde tu dispositivo</button></p>
+              <h3 data-i18n="mergeDropTitle">Drag your PDF files here</h3>
+              <p data-i18n="mergeDropBrowse">or <button type="button" class="btn-link" id="btn-browse-merge">browse on your device</button></p>
               <div class="dropzone-tip">
-                <span>Puedes añadir varios archivos y organizarlos en el orden que prefieras</span>
+                <span data-i18n="mergeDropTip">You can add multiple files and arrange them in any order</span>
               </div>
             </div>
           </div>
@@ -162,39 +209,39 @@
           <div class="files-section" id="merge-files-section" style="display: none;">
             <div class="section-header">
               <div class="section-title">
-                <h4>Archivos seleccionados (<span id="merge-file-count">0</span>)</h4>
-                <p>Se unirán en el orden mostrado a continuación</p>
+                <h4 data-i18n="mergeSelectedTitle">Selected files (<span id="merge-file-count">0</span>)</h4>
+                <p data-i18n="mergeSelectedSubtitle">They will be merged in the order shown below</p>
               </div>
               <div class="section-actions">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-add-more-merge">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  Añadir más
+                  <span data-i18n="btnAddMoreMerge">Add more</span>
                 </button>
                 <button type="button" class="btn btn-danger-outline btn-sm" id="btn-clear-merge">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  Limpiar lista
+                  <span data-i18n="btnClearMerge">Clear list</span>
                 </button>
               </div>
             </div>
 
             <!-- Lista interactiva de archivos -->
-            <ul class="file-list" id="merge-file-list" aria-label="Lista de PDFs a combinar">
+            <ul class="file-list" id="merge-file-list" aria-label="PDF files to merge">
               <!-- Renderizado dinámico vía JavaScript -->
             </ul>
 
             <!-- Configuración de salida y botón de descarga al lado -->
             <div class="download-action-bar">
               <div class="download-name-group">
-                <label for="merge-output-name">Nombre del archivo PDF:</label>
+                <label for="merge-output-name" data-i18n="mergeOutputLabel">PDF file name:</label>
                 <div class="input-with-ext">
-                  <input type="text" id="merge-output-name" value="PDF_combinado" placeholder="Nombre de archivo">
+                  <input type="text" id="merge-output-name" value="PDF_merged" placeholder="file_name" data-i18n-placeholder="mergeOutputPlaceholder">
                   <span class="extension">.pdf</span>
                 </div>
               </div>
 
               <button type="button" class="btn btn-primary btn-lg btn-download-action" id="btn-do-merge">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Descargar PDF Combinado</span>
+                <span data-i18n="btnDoMerge">Download Merged PDF</span>
               </button>
             </div>
           </div>
@@ -213,10 +260,10 @@
               <div class="dropzone-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
               </div>
-              <h3>Selecciona un archivo PDF para cortar</h3>
-              <p>o <button type="button" class="btn-link" id="btn-browse-cut">explorar en tu dispositivo</button></p>
+              <h3 data-i18n="cutDropTitle">Select a PDF file to cut</h3>
+              <p data-i18n="cutDropBrowse">or <button type="button" class="btn-link" id="btn-browse-cut">browse on your device</button></p>
               <div class="dropzone-tip">
-                <span>Podrás seleccionar las páginas visualmente, por rango rápido o escribiendo páginas específicas</span>
+                <span data-i18n="cutDropTip">You will be able to select pages visually, by quick range, or by typing specific page numbers</span>
               </div>
             </div>
           </div>
@@ -229,49 +276,49 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
               </div>
               <div class="file-info-details">
-                <h4 id="cut-file-name">documento.pdf</h4>
+                <h4 id="cut-file-name">document.pdf</h4>
                 <div class="file-meta">
-                  <span class="badge" id="cut-total-pages-badge">0 páginas</span>
+                  <span class="badge" id="cut-total-pages-badge">0 pages</span>
                   <span class="meta-size" id="cut-file-size">0 KB</span>
                 </div>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" id="btn-change-cut-pdf">
-                Cambiar archivo
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-change-cut-pdf" data-i18n="btnChangeCutPdf">
+                Change file
               </button>
             </div>
 
             <!-- Panel de Opciones de Selección -->
             <div class="options-box">
               <div class="options-box-title">
-                <h5>Opciones de Selección de Páginas</h5>
+                <h5 data-i18n="cutOptionsTitle">Page Selection Options</h5>
               </div>
 
               <div class="options-grid">
                 <!-- Rango Rápido (Desde - Hasta) -->
                 <div class="range-tool-group">
-                  <label class="group-label">Rango Rápido:</label>
+                  <label class="group-label" data-i18n="rangeQuickLabel">Quick Range:</label>
                   <div class="range-inputs">
                     <div class="input-inline">
-                      <span>Desde:</span>
+                      <span data-i18n="rangeFromLabel">From:</span>
                       <input type="number" id="spin-from" min="1" value="1">
                     </div>
                     <div class="input-inline">
-                      <span>Hasta:</span>
+                      <span data-i18n="rangeToLabel">To:</span>
                       <input type="number" id="spin-to" min="1" value="1">
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-spin-range">
-                      Seleccionar Rango
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-spin-range" data-i18n="btnApplySpinRange">
+                      Select Range
                     </button>
                   </div>
                 </div>
 
                 <!-- Expresión de Texto Personalizada -->
                 <div class="range-tool-group">
-                  <label class="group-label" for="txt-custom-range">Texto de páginas personalizadas:</label>
+                  <label class="group-label" for="txt-custom-range" data-i18n="customRangeLabel">Custom page expression:</label>
                   <div class="range-inputs custom-text-input">
-                    <input type="text" id="txt-custom-range" placeholder="Ejemplo: 1-4, 7, 10-12">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-custom-range">
-                      Aplicar Texto
+                    <input type="text" id="txt-custom-range" placeholder="Example: 1-4, 7, 10-12" data-i18n-placeholder="customRangePlaceholder">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-custom-range" data-i18n="btnApplyCustomRange">
+                      Apply Text
                     </button>
                   </div>
                 </div>
@@ -280,21 +327,21 @@
               <!-- Botones Rápidos de Selección Global -->
               <div class="selection-quick-bar">
                 <div class="counter-display">
-                  <span class="counter-label">Páginas seleccionadas:</span>
-                  <span class="counter-highlight" id="cut-selected-count">0</span> de <span id="cut-total-count">0</span>
+                  <span class="counter-label" data-i18n="counterSelectedLabel">Selected pages:</span>
+                  <span class="counter-highlight" id="cut-selected-count">0</span> <span data-i18n="counterOf">of</span> <span id="cut-total-count">0</span>
                 </div>
                 <div class="quick-buttons">
                   <button type="button" class="btn btn-chip" id="btn-select-all-pages">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    Seleccionar todas
+                    <span data-i18n="btnSelectAll">Select all</span>
                   </button>
                   <button type="button" class="btn btn-chip" id="btn-deselect-all-pages">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    Deseleccionar todas
+                    <span data-i18n="btnDeselectAll">Deselect all</span>
                   </button>
                   <button type="button" class="btn btn-chip" id="btn-invert-selection">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-                    Invertir
+                    <span data-i18n="btnInvert">Invert</span>
                   </button>
                 </div>
               </div>
@@ -303,7 +350,7 @@
             <!-- Cuadrícula Visual de Miniaturas de Páginas -->
             <div class="pages-grid-wrapper">
               <div class="pages-grid-legend">
-                <span>Haz clic en cualquier página para marcarla o desmarcarla</span>
+                <span data-i18n="pagesGridLegend">Click on any page to select or deselect it</span>
               </div>
               <div class="pages-grid" id="pages-grid-container">
                 <!-- Miniaturas renderizadas dinámicamente con PDF.js -->
@@ -313,16 +360,16 @@
             <!-- Guardar Sección Cortada y Descarga al lado -->
             <div class="download-action-bar">
               <div class="download-name-group">
-                <label for="cut-output-name">Nombre del archivo PDF:</label>
+                <label for="cut-output-name" data-i18n="cutOutputLabel">PDF file name:</label>
                 <div class="input-with-ext">
-                  <input type="text" id="cut-output-name" value="documento_cortado" placeholder="Nombre de archivo">
+                  <input type="text" id="cut-output-name" value="document_cut" placeholder="file_name" data-i18n-placeholder="cutOutputPlaceholder">
                   <span class="extension">.pdf</span>
                 </div>
               </div>
 
               <button type="button" class="btn btn-success btn-lg btn-download-action" id="btn-do-cut" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Descargar PDF Cortado</span>
+                <span data-i18n="btnDoCut">Download Cut PDF</span>
               </button>
             </div>
           </div>
@@ -330,7 +377,7 @@
       </section>
 
       <!-- ============================================== -->
-      <!-- TAB 3: GENERAR PDF CON IMÁGENES (CamScanner)   -->
+      <!-- TAB 3: GENERAR PDF CON IMÁGENES                -->
       <!-- ============================================== -->
       <section class="tab-panel" id="tab-img2pdf" role="tabpanel">
         <div class="panel-card">
@@ -341,57 +388,57 @@
               <div class="dropzone-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
               </div>
-              <h3>Arrastra tus fotos o imágenes aquí</h3>
-              <p>Formatos soportados: JPG, PNG, WebP, BMP (Puedes seleccionar múltiples imágenes a la vez)</p>
+              <h3 data-i18n="img2pdfDropTitle">Drag your photos or images here</h3>
+              <p data-i18n="img2pdfDropDesc">Supported formats: JPG, PNG, WebP, BMP (You can select multiple images at once)</p>
               <button type="button" class="btn btn-primary" id="btn-browse-img2pdf">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                <span>Seleccionar Imágenes</span>
+                <span data-i18n="btnBrowseImg2Pdf">Select Images</span>
               </button>
             </div>
           </div>
 
           <!-- Contenido de Gestión de Imágenes (Oculto al inicio) -->
           <div class="content-section" id="img2pdf-content-section" style="display: none;">
-            <!-- Barra de Herramientas y Switch CamScanner -->
+            <!-- Barra de Herramientas y Switch de Contraste Mágico -->
             <div class="img2pdf-toolbar">
               <div class="img2pdf-toolbar-group">
-                <!-- Switch de Contraste Mágico estilo CamScanner -->
-                <div class="magic-contrast-switch-box" id="toggle-magic-contrast" title="Activa o desactiva el realce de documento escaneado (blanquea fondos y oscurece texto)">
+                <!-- Switch de Contraste Mágico -->
+                <div class="magic-contrast-switch-box" id="toggle-magic-contrast" title="Enable or disable scanned document enhancement (whitens paper and darkens text)" data-i18n-title="magicContrastTooltip">
                   <div class="magic-switch-toggle">
                     <div class="magic-switch-handle"></div>
                   </div>
                   <div class="magic-switch-info">
-                    <span class="magic-switch-title">🪄 Contraste Mágico</span>
-                    <span class="magic-switch-desc">Efecto CamScanner (blanquea papel)</span>
+                    <span class="magic-switch-title" data-i18n="magicContrastTitle">🪄 Magic Contrast</span>
+                    <span class="magic-switch-desc" data-i18n="magicContrastDesc">Paper contrast (whitens background)</span>
                   </div>
                 </div>
 
                 <!-- Opciones de Página -->
                 <div class="page-options-row">
                   <div class="opt-inline-group">
-                    <label for="img2pdf-page-size">Tamaño:</label>
+                    <label for="img2pdf-page-size" data-i18n="pageSizeLabel">Size:</label>
                     <select id="img2pdf-page-size" class="select-styled">
-                      <option value="a4" selected>A4 (210 × 297 mm)</option>
-                      <option value="letter">Carta / Letter</option>
-                      <option value="auto">Ajustar a Imagen</option>
+                      <option value="a4" selected data-i18n="optSizeA4">A4 (210 × 297 mm)</option>
+                      <option value="letter" data-i18n="optSizeLetter">Letter</option>
+                      <option value="auto" data-i18n="optSizeAuto">Fit to Image</option>
                     </select>
                   </div>
 
                   <div class="opt-inline-group">
-                    <label for="img2pdf-orientation">Orientación:</label>
+                    <label for="img2pdf-orientation" data-i18n="orientationLabel">Orientation:</label>
                     <select id="img2pdf-orientation" class="select-styled">
-                      <option value="auto" selected>Automática</option>
-                      <option value="portrait">Vertical</option>
-                      <option value="landscape">Horizontal</option>
+                      <option value="auto" selected data-i18n="optOriAuto">Automatic</option>
+                      <option value="portrait" data-i18n="optOriPortrait">Portrait</option>
+                      <option value="landscape" data-i18n="optOriLandscape">Landscape</option>
                     </select>
                   </div>
 
                   <div class="opt-inline-group">
-                    <label for="img2pdf-margins">Márgenes:</label>
+                    <label for="img2pdf-margins" data-i18n="marginsLabel">Margins:</label>
                     <select id="img2pdf-margins" class="select-styled">
-                      <option value="none" selected>Sin margen (0)</option>
-                      <option value="small">Pequeño (10 mm)</option>
-                      <option value="normal">Normal (20 mm)</option>
+                      <option value="none" selected data-i18n="optMarginNone">No margin (0)</option>
+                      <option value="small" data-i18n="optMarginSmall">Small (10 mm)</option>
+                      <option value="normal" data-i18n="optMarginNormal">Normal (20 mm)</option>
                     </select>
                   </div>
                 </div>
@@ -401,11 +448,11 @@
               <div class="toolbar-actions-right">
                 <button type="button" class="btn btn-secondary btn-sm" id="btn-add-more-img2pdf">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  <span>Añadir Fotos</span>
+                  <span data-i18n="btnAddMoreImg2Pdf">Add Photos</span>
                 </button>
                 <button type="button" class="btn btn-danger-outline btn-sm" id="btn-clear-img2pdf">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  <span>Vaciar Todo</span>
+                  <span data-i18n="btnClearImg2Pdf">Clear All</span>
                 </button>
               </div>
             </div>
@@ -413,10 +460,10 @@
             <!-- Resumen de Páginas -->
             <div class="selection-summary-bar">
               <div class="selection-badge">
-                <span id="img2pdf-images-count">0 imágenes</span> preparadas para el PDF
+                <span id="img2pdf-images-count">0 images</span> <span data-i18n="imagesCountSuffix">prepared for PDF</span>
               </div>
-              <p style="font-size: 0.8rem; color: var(--text-dimmed); margin: 0;">
-                💡 Puedes cortar o rotar cada imagen individualmente antes de generar el PDF.
+              <p style="font-size: 0.8rem; color: var(--text-dimmed); margin: 0;" data-i18n="summaryTipImg2Pdf">
+                💡 You can crop or rotate each image individually before generating the PDF.
               </p>
             </div>
 
@@ -426,16 +473,16 @@
             <!-- Ajustes de Salida y Descarga al lado -->
             <div class="download-action-bar">
               <div class="download-name-group">
-                <label for="img2pdf-output-name">Nombre del archivo PDF:</label>
+                <label for="img2pdf-output-name" data-i18n="img2pdfOutputLabel">PDF file name:</label>
                 <div class="input-with-ext">
-                  <input type="text" id="img2pdf-output-name" value="documento_imagenes" placeholder="nombre_del_documento">
+                  <input type="text" id="img2pdf-output-name" value="document_images" placeholder="document_name" data-i18n-placeholder="img2pdfOutputPlaceholder">
                   <span class="extension">.pdf</span>
                 </div>
               </div>
 
               <button type="button" class="btn btn-success btn-lg btn-download-action" id="btn-do-img2pdf">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                <span>Descargar PDF con Imágenes</span>
+                <span data-i18n="btnDoImg2Pdf">Download PDF with Images</span>
               </button>
             </div>
           </div>
@@ -451,7 +498,7 @@
       <div class="sticky-sidebar">
         <!-- Bloque 1 de Publicidad Oficial -->
         <div class="ad-card" id="ad-sidebar-slot-1">
-          <span class="ad-label">PUBLICIDAD</span>
+          <span class="ad-label" data-i18n="adLabel">ADVERTISEMENT</span>
           <div style="padding: 0.5rem; text-align: center;">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -469,27 +516,27 @@
         <div class="feature-card">
           <div class="feature-header">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            <h5>Seguridad & Velocidad</h5>
+            <h5 data-i18n="featureCardTitle">Security &amp; Speed</h5>
           </div>
           <ul class="feature-list">
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Procesamiento 100% en tu navegador
+              <span data-i18n="feature1">100% in-browser processing</span>
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Tus documentos no se suben a ningún servidor
+              <span data-i18n="feature2">Your documents are never uploaded to any server</span>
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              Sin límites diarios ni registro obligatorio
+              <span data-i18n="feature3">No daily limits or mandatory registration</span>
             </li>
           </ul>
         </div>
 
         <!-- Bloque 2 de Publicidad Secundario Oficial -->
         <div class="ad-card" id="ad-sidebar-slot-2">
-          <span class="ad-label">PUBLICIDAD</span>
+          <span class="ad-label" data-i18n="adLabel">ADVERTISEMENT</span>
           <div style="padding: 0.5rem; text-align: center;">
             <ins class="adsbygoogle"
                  style="display:block"
@@ -506,9 +553,9 @@
     </aside>
   </main>
 
-  <!-- Banner Publicitario Inferior Oficial (En flujo normal, no flotante para no tapar la pantalla) -->
+  <!-- Banner Publicitario Inferior Oficial -->
   <aside class="container-main" style="margin: 2rem auto 1.5rem auto; text-align: center; max-width: 100%; overflow: hidden;">
-    <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.06em;">Publicidad</div>
+    <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.06em;" data-i18n="adLabel">ADVERTISEMENT</div>
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-client="ca-pub-5786595894984320"
@@ -523,13 +570,13 @@
   <!-- Pie de Página -->
   <footer class="footer">
     <div class="container-main footer-content">
-      <p>© 2026 PDF Tools Ambystoma Studio • Herramienta de código abierto alojada en GitHub Pages</p>
+      <p data-i18n="footerCopy">© 2026 PDF Tools Ambystoma Studio • Open-source tool hosted on GitHub Pages</p>
       <div class="footer-links">
-        <span>Privacidad Total</span>
+        <span data-i18n="footerLink1">Total Privacy</span>
         <span>•</span>
-        <span>Sin Servidor</span>
+        <span data-i18n="footerLink2">Serverless</span>
         <span>•</span>
-        <span>Rápido & Seguro</span>
+        <span data-i18n="footerLink3">Fast &amp; Secure</span>
       </div>
     </div>
   </footer>
@@ -538,8 +585,8 @@
   <div class="modal-overlay" id="progress-modal" style="display: none;">
     <div class="modal-card">
       <div class="spinner-ring"></div>
-      <h3 id="progress-title">Procesando archivo...</h3>
-      <p id="progress-desc">Por favor espera un momento mientras preparamos tu documento.</p>
+      <h3 id="progress-title" data-i18n="progressDefaultTitle">Processing file...</h3>
+      <p id="progress-desc" data-i18n="progressDefaultDesc">Please wait a moment while we prepare your document.</p>
       <div class="progress-bar-container">
         <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
       </div>
@@ -554,9 +601,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="about-icon-header">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
           </svg>
-          <h3>Acerca de PDF Tools Ambystoma Studio</h3>
+          <h3 data-i18n="aboutTitle">About PDF Tools Ambystoma Studio</h3>
         </div>
-        <button type="button" class="btn-close-modal" id="btn-close-about" aria-label="Cerrar modal">
+        <button type="button" class="btn-close-modal" id="btn-close-about" aria-label="Close modal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
@@ -564,25 +611,25 @@
       <div class="modal-about-body">
         <!-- Bloque Desarrollador -->
         <div class="about-dev-box" style="text-align: center;">
-          <a href="https://ambystomatechnologies.github.io/" title="Ambystoma Technologies - Ir al sitio principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="cursor: pointer; display: inline-block; text-decoration: none;">
+          <a href="https://ambystomatechnologies.github.io/" title="Ambystoma Technologies" onclick="window.location.href='https://ambystomatechnologies.github.io/';" style="cursor: pointer; display: inline-block; text-decoration: none;">
             <img src="logo.png" alt="Ambystoma Technologies" style="max-height: 48px; max-width: 80%; object-fit: contain; margin-bottom: 0.75rem; cursor: pointer;">
           </a>
-          <div class="dev-badge">Desarrollo & Contacto</div>
+          <div class="dev-badge" data-i18n="aboutDevBadge">Development &amp; Contact</div>
           <h4>Ambystoma Technologies</h4>
-          <p>Herramientas digitales seguras, accesibles y de alto rendimiento.</p>
+          <p data-i18n="aboutDevDesc">Secure, accessible, and high-performance digital tools.</p>
           <a href="mailto:ambystomatechnologies@gmail.com" class="about-email-link">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             <span>ambystomatechnologies@gmail.com</span>
           </a>
         </div>
 
-        <!-- Bloque Destacado de Uso 100% Totalmente Gratuito (SEO y Beneficio al Usuario) -->
+        <!-- Bloque Destacado de Uso 100% Totalmente Gratuito -->
         <div class="about-free-banner">
           <div class="box-title">
-            <h5>✨ Herramienta y Servicio 100% Totalmente Gratuito</h5>
+            <h5 data-i18n="aboutFreeTitle">✨ 100% Free Tool and Service</h5>
           </div>
-          <p>
-            <strong>PDF Tools Ambystoma Studio</strong> es una herramienta <strong>100% gratuita y de libre acceso</strong>. No requiere ningún tipo de registro, no contiene suscripciones de pago ni tarifas ocultas. Puedes <strong>combinar documentos PDF ilimitados</strong>, <strong>cortar y dividir páginas</strong> o <strong>crear archivos PDF a partir de imágenes</strong> todas las veces que lo necesites sin límites de uso y con total confidencialidad.
+          <p data-i18n="aboutFreeDesc">
+            <strong>PDF Tools Ambystoma Studio</strong> is a <strong>100% free and open-access</strong> utility. It requires no registration, contains no paid subscriptions, and has no hidden fees. You can <strong>merge unlimited PDF documents</strong>, <strong>cut and split pages</strong>, or <strong>create PDF files from images</strong> as often as you need with zero usage limits and complete confidentiality.
           </p>
         </div>
 
@@ -590,28 +637,28 @@
         <div class="about-privacy-box">
           <div class="box-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <h5>Procesamiento 100% en tu Dispositivo</h5>
+            <h5 data-i18n="aboutPrivacyTitle">100% On-Device Processing</h5>
           </div>
-          <p>Esta aplicación procesa tus archivos PDF <strong>exclusivamente dentro de la memoria de tu propio navegador web</strong>. No se utiliza ningún servidor externo, backend ni almacenamiento en la nube. Tus documentos confidenciales nunca salen de tu ordenador ni son accesibles por terceros.</p>
+          <p data-i18n="aboutPrivacyDesc">This application processes your PDF files <strong>exclusively inside your web browser's memory</strong>. No external server, backend, or cloud storage is used. Your confidential documents never leave your computer and are inaccessible to third parties.</p>
         </div>
 
         <!-- Bloque Cláusulas Legales y Propiedad Intelectual -->
         <div class="about-legal-box">
           <div class="box-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            <h5>Términos de Uso y Exención de Responsabilidad</h5>
+            <h5 data-i18n="aboutLegalTitle">Terms of Use and Disclaimer</h5>
           </div>
-          <p>PDF Tools Studio se distribuye únicamente como una <strong>herramienta técnica de software neutral</strong> para la organización y manipulación de archivos digitales.</p>
+          <p data-i18n="aboutLegalDesc">PDF Tools Studio is distributed solely as a <strong>neutral software utility</strong> for digital file organization and manipulation.</p>
           <ul>
-            <li><strong>Propiedad Intelectual:</strong> El usuario es el único y exclusivo responsable del origen, contenido, licencias y derechos de autor de cualquier documento que corte, combine, extraiga o descargue a través de esta herramienta.</li>
-            <li><strong>Liberación Total de Responsabilidad:</strong> <em>Ambystoma Technologies</em> queda total y expresamente eximida de cualquier culpa, daño, litigio, perjuicio directo o indirecto o sanción derivada del uso indebido que usuarios o terceros realicen de esta herramienta, en particular en casos de infracción a leyes de propiedad intelectual, derechos de autor, plagio o divulgación de material confidencial no autorizado.</li>
-            <li><strong>Uso "Tal Cual" (As-Is):</strong> El servicio se provee sin garantías de ninguna índole, expresas o implícitas, respecto de su adecuación para fines particulares o continuidad ininterrumpida.</li>
+            <li data-i18n="aboutLegalItem1"><strong>Intellectual Property:</strong> The user is solely and exclusively responsible for the origin, content, licensing, and copyright of any document cut, merged, extracted, or downloaded through this tool.</li>
+            <li data-i18n="aboutLegalItem2"><strong>Full Disclaimer of Liability:</strong> <em>Ambystoma Technologies</em> is completely and expressly indemnified and released from any liability, damage, litigation, direct or indirect harm, or sanction arising from improper use by users or third parties, particularly regarding copyright infringement, plagiarism, or unauthorized disclosure of confidential material.</li>
+            <li data-i18n="aboutLegalItem3"><strong>"As-Is" Service:</strong> The service is provided without warranties of any kind, express or implied, regarding fitness for particular purposes or uninterrupted availability.</li>
           </ul>
         </div>
       </div>
 
       <div class="modal-about-footer">
-        <button type="button" class="btn btn-primary" id="btn-accept-about">Comprendido y Aceptar</button>
+        <button type="button" class="btn btn-primary" id="btn-accept-about" data-i18n="btnAcceptAbout">Understood &amp; Accept</button>
       </div>
     </div>
   </div>
@@ -622,9 +669,9 @@
       <div class="crop-modal-header">
         <div class="crop-modal-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
-          <span id="crop-modal-heading">Recortar Imagen de Página</span>
+          <span id="crop-modal-heading" data-i18n="cropModalHeading">Crop Page Image</span>
         </div>
-        <button type="button" class="btn-close-modal" id="btn-close-crop" aria-label="Cerrar recorte">
+        <button type="button" class="btn-close-modal" id="btn-close-crop" aria-label="Close crop">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
@@ -633,22 +680,22 @@
         <div class="crop-canvas-wrapper" id="crop-canvas-wrapper">
           <canvas id="crop-canvas"></canvas>
         </div>
-        <div class="crop-instructions">
-          Arrastra el recuadro o sus esquinas sobre el documento para definir el área de corte deseada.
+        <div class="crop-instructions" data-i18n="cropInstructions">
+          Drag the box or its corners over the document to define the desired crop area.
         </div>
       </div>
 
       <div class="crop-modal-footer">
         <div class="crop-presets">
-          <button type="button" class="btn-crop-preset active" data-preset="free" id="btn-preset-free">Libre</button>
-          <button type="button" class="btn-crop-preset" data-preset="a4" id="btn-preset-a4">Proporción A4</button>
-          <button type="button" class="btn-crop-preset" id="btn-crop-reset">Imagen Completa</button>
+          <button type="button" class="btn-crop-preset active" data-preset="free" id="btn-preset-free" data-i18n="btnPresetFree">Free</button>
+          <button type="button" class="btn-crop-preset" data-preset="a4" id="btn-preset-a4" data-i18n="btnPresetA4">A4 Ratio</button>
+          <button type="button" class="btn-crop-preset" id="btn-crop-reset" data-i18n="btnCropReset">Full Image</button>
         </div>
         <div class="crop-footer-actions">
-          <button type="button" class="btn btn-secondary" id="btn-crop-cancel">Cancelar</button>
+          <button type="button" class="btn btn-secondary" id="btn-crop-cancel" data-i18n="btnCropCancel">Cancel</button>
           <button type="button" class="btn btn-primary" id="btn-crop-apply">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Aplicar Recorte</span>
+            <span data-i18n="btnCropApply">Apply Crop</span>
           </button>
         </div>
       </div>
@@ -659,6 +706,7 @@
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
   <!-- Scripts de la Aplicación -->
+  <script src="js/i18n.js"></script>
   <script src="js/pdf-service.js"></script>
   <script src="js/app.js"></script>
 </body>

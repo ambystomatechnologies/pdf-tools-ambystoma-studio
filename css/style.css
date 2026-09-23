@@ -181,6 +181,52 @@ body {
   gap: 0.75rem;
 }
 
+/* Selector de Idiomas con Banderas Circulares */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 6px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+.lang-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  opacity: 0.6;
+}
+
+.lang-btn:hover {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.lang-btn.active {
+  opacity: 1;
+  border-color: var(--primary-light, #818cf8);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+  transform: scale(1.06);
+}
+
+.lang-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 .btn-about {
   display: inline-flex;
   align-items: center;
@@ -1840,7 +1886,7 @@ body {
 }
 
 /* ==========================================================================
-   TAB 3: GENERAR PDF CON IMÁGENES (CamScanner / Recorte / Contraste Mágico)
+   TAB 3: GENERAR PDF CON IMÁGENES (Recorte / Contraste Mágico)
    ========================================================================== */
 
 /* Barra de Herramientas de Imágenes */
@@ -1864,7 +1910,7 @@ body {
   flex-wrap: wrap;
 }
 
-/* Switch de Contraste Mágico (Estilo CamScanner) */
+/* Switch de Contraste Mágico */
 .magic-contrast-switch-box {
   display: flex;
   align-items: center;

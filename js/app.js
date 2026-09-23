@@ -639,7 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // TAB 3: GENERAR PDF CON IMÁGENES (CamScanner / Recorte / Contraste Mágico)
+  // TAB 3: GENERAR PDF CON IMÁGENES (Recorte / Contraste Mágico)
   // =========================================================================
   const img2pdfDropzone = document.getElementById('img2pdf-dropzone');
   const img2pdfFileInput = document.getElementById('img2pdf-file-input');
@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Switch de Contraste Mágico estilo CamScanner
+  // Switch de Contraste Mágico
   if (toggleMagicContrast) {
     toggleMagicContrast.addEventListener('click', () => {
       state.magicContrast = !state.magicContrast;
@@ -698,9 +698,9 @@ document.addEventListener('DOMContentLoaded', () => {
       renderImagesGrid();
 
       if (state.magicContrast) {
-        showToast('🪄 Contraste Mágico activado: Blanquea fondos de papel y resalta texto como CamScanner.', 'success');
+        showToast(window.t ? window.t('toast_magic_enabled') : '🪄 Magic Contrast enabled: Whitens paper backgrounds and sharpens text.', 'success');
       } else {
-        showToast('Contraste Mágico desactivado: Mostrando fotos en color natural.', 'info');
+        showToast(window.t ? window.t('toast_magic_disabled') : 'Magic Contrast disabled: Showing photos in original natural color.', 'info');
       }
     });
   }
@@ -709,19 +709,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnClearImg2pdf) {
     btnClearImg2pdf.addEventListener('click', () => {
       if (state.img2pdfItems.length === 0) return;
-      if (confirm('¿Deseas eliminar todas las imágenes cargadas?')) {
+      const confirmMsg = window.t ? window.t('confirm_clear_images') : 'Are you sure you want to clear all images?';
+      if (confirm(confirmMsg)) {
         state.img2pdfItems = [];
         renderImagesGrid();
-        showToast('Se han vaciado todas las imágenes.', 'info');
+        showToast(window.t ? window.t('toast_images_cleared') : 'All images have been cleared.', 'info');
       }
     });
   }
 
   /**
-   * Algoritmo de Realce de Documento (Efecto CamScanner)
+   * Algoritmo de Realce de Documento (Contraste Mágico)
    * Blanquea sombras de papel y fondos grises, y oscurece la tinta.
    */
-  function applyCamScannerEffect(ctx, width, height) {
+  function applyMagicContrastEffect(ctx, width, height) {
     const imgData = ctx.getImageData(0, 0, width, height);
     const d = imgData.data;
     const len = d.length;
@@ -734,8 +735,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Luminancia monocromática
       const lum = 0.299 * r + 0.587 * g + 0.114 * b;
 
-      // Curva de contraste CamScanner:
-      // - Fondos de papel y sombras (> 160) se blanquean a 255 (#FFFFFF)
+      // Curva de realce de documento:
+      // - Fondos de papel y sombras (> 165) se blanquean a 255 (#FFFFFF)
       // - Texto y trazos de tinta (< 90) se intensifican a negro profundo
       // - Transición suave entre tinta y papel
       let out;
@@ -841,7 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ctx.restore();
 
               if (magicContrast) {
-                applyCamScannerEffect(ctx, canvas.width, canvas.height);
+                applyMagicContrastEffect(ctx, canvas.width, canvas.height);
               }
 
               return canvas.toDataURL('image/jpeg', 0.92);
@@ -1357,12 +1358,13 @@ document.addEventListener('DOMContentLoaded', () => {
         magicContrast: state.magicContrast
       };
 
-      showProgress(
-        'Generando documento PDF...',
-        state.magicContrast 
-          ? 'Aplicando realce de contraste CamScanner e incrustando imágenes en alta definición...' 
-          : 'Compilando tus imágenes en un documento PDF de alta calidad...'
-      );
+      const isMagic = state.magicContrast;
+      const progressTitle = window.t ? window.t('progress_img2pdf_title') : 'Generating PDF document...';
+      const progressDesc = isMagic
+        ? (window.t ? window.t('progress_img2pdf_desc_magic') : 'Applying magic contrast enhancement and embedding high-definition images...')
+        : (window.t ? window.t('progress_img2pdf_desc_normal') : 'Compiling your images into a high-quality PDF document...');
+
+      showProgress(progressTitle, progressDesc);
 
       try {
         const pdfBlob = await PDFService.imagesToPDF(state.img2pdfItems, options, (current, total, pct) => {
@@ -1370,10 +1372,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         PDFService.downloadBlob(pdfBlob, fileName);
-        showToast(`✓ "${fileName}" generado y descargado exitosamente.`, 'success', 4500);
+        showToast(window.t ? window.t('toast_img2pdf_success', { name: fileName }) : `✓ "${fileName}" generated and downloaded successfully.`, 'success', 4500);
       } catch (err) {
         console.error('Error al generar PDF de imágenes:', err);
-        showToast(err.message || 'Error al compilar el PDF de imágenes.', 'error');
+        showToast(err.message || (window.t ? window.t('toast_img2pdf_error') : 'Error compiling PDF from images.'), 'error');
       } finally {
         hideProgress();
       }
@@ -1421,5 +1423,24 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       window.location.href = 'https://ambystomatechnologies.github.io/';
     });
+  });
+
+  // Re-renderizado reactivo ante cambio de idioma
+  window.addEventListener('languageChanged', () => {
+    if (typeof renderMergeList === 'function' && state.mergeFiles && state.mergeFiles.length > 0) {
+      renderMergeList();
+    }
+    if (state.cutFile) {
+      const cutBadge = document.getElementById('cut-total-pages-badge');
+      if (cutBadge) {
+        cutBadge.textContent = `${state.cutFile.totalPages} ${window.currentLang === 'es' ? (state.cutFile.totalPages === 1 ? 'página' : 'páginas') : (state.cutFile.totalPages === 1 ? 'page' : 'pages')}`;
+      }
+      if (typeof updateCutSelectionCounter === 'function') {
+        updateCutSelectionCounter();
+      }
+    }
+    if (state.img2pdfItems && state.img2pdfItems.length > 0 && typeof renderImagesGrid === 'function') {
+      renderImagesGrid();
+    }
   });
 });
