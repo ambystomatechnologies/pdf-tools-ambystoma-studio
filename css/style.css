@@ -1565,6 +1565,42 @@ body {
   text-decoration: underline;
 }
 
+.about-free-banner {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.08);
+}
+
+.about-free-banner .box-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #34d399;
+  margin-bottom: 0.45rem;
+}
+
+.about-free-banner .box-title svg {
+  width: 18px;
+  height: 18px;
+  color: #34d399;
+}
+
+.about-free-banner h5 {
+  font-size: 0.96rem;
+  font-weight: 700;
+  margin: 0;
+  color: #34d399;
+}
+
+.about-free-banner p {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .about-privacy-box {
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.25);
