@@ -2112,7 +2112,7 @@ body {
   overflow: hidden;
   padding: 0.5rem;
   position: relative;
-  cursor: pointer;
+  cursor: default;
 }
 
 /* Botón de tijeras flotante sobre la imagen */

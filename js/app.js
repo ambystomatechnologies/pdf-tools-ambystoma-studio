@@ -803,15 +803,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderImagesGrid();
 
-      if (loadedCount > 0) {
-        const successMsg = window.t 
-          ? window.t('toast_images_optimized', { count: loadedCount })
-          : `${loadedCount} imagen(es) optimizada(s) y lista(s).`;
-        showToast(successMsg, 'success');
-      }
-      if (failedCount > 0) {
-        showToast(`${failedCount} imagen(es) no pudieron ser decodificadas.`, 'warning', 4000);
-      }
     } catch (err) {
       console.error('Error al cargar imágenes:', err);
       showToast(window.t ? window.t('toast_images_process_error') : 'Ocurrió un error al procesar algunas imágenes.', 'error');
@@ -1135,25 +1126,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
 
-      // Botón de tijeras en la cabecera junto a la imagen
-      const btnHeaderCrop = document.createElement('button');
-      btnHeaderCrop.type = 'button';
-      btnHeaderCrop.className = 'btn-card-crop-badge';
-      btnHeaderCrop.title = 'Cortar / Recortar esta imagen';
-      btnHeaderCrop.innerHTML = `
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
-        <span>Cortar ✂️</span>
-      `;
-      btnHeaderCrop.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCropModal(item);
-      });
-      header.appendChild(btnHeaderCrop);
-
-      // Contenedor de miniatura interactiva
+      // Contenedor de miniatura
       const previewBox = document.createElement('div');
       previewBox.className = 'image-card-preview-box';
-      previewBox.title = 'Haz clic para cortar / recortar imagen';
 
       const thumbImg = document.createElement('img');
       thumbImg.className = 'image-card-thumb';
@@ -1161,23 +1136,6 @@ document.addEventListener('DOMContentLoaded', () => {
       thumbImg.src = item.getThumbnailUrl();
 
       previewBox.appendChild(thumbImg);
-
-      // Botón flotante de tijeras directamente sobre la imagen
-      const overlayCropBtn = document.createElement('button');
-      overlayCropBtn.type = 'button';
-      overlayCropBtn.className = 'thumb-crop-overlay-btn';
-      overlayCropBtn.title = 'Cortar / Recortar esta imagen';
-      overlayCropBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
-        <span>Cortar</span>
-      `;
-      overlayCropBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCropModal(item);
-      });
-      previewBox.appendChild(overlayCropBtn);
-
-      previewBox.addEventListener('click', () => openCropModal(item));
 
       if (item.crop) {
         const cropTag = document.createElement('span');
@@ -1216,7 +1174,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btnRotate.addEventListener('click', () => {
         item.rotation = (item.rotation + 90) % 360;
         thumbImg.src = item.getThumbnailUrl();
-        showToast(`Página ${index + 1} rotada 90°.`, 'info', 2000);
       });
 
       // 3. Botón Mover (arriba / abajo)
@@ -1372,7 +1329,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderImagesGrid();
       closeCropModal();
-      showToast('Recorte guardado con éxito.', 'success');
     });
   }
 
