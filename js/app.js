@@ -758,105 +758,346 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Carga y procesa los archivos de imagen seleccionados
+   * Carga y procesa los archivos de imagen seleccionados progresivamente (uno a uno)
+   * para evitar desbordar la memoria RAM en dispositivos móviles (iPhone/Safari).
    */
   async function handleImg2PdfFiles(files) {
-    const validImages = files.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|bmp)$/i.test(f.name));
+    const validImages = files.filter(f => !f.type || f.type.startsWith('image/') || /\.(jpe?g|png|webp|bmp|heic|heif|tif|tiff)$/i.test(f.name));
     if (validImages.length === 0) {
-      showToast('Por favor selecciona archivos de imagen válidos (JPG, PNG, WebP, BMP).', 'warning');
+      showToast(window.t ? window.t('toast_invalid_images') : 'Por favor selecciona archivos de imagen válidos (JPG, PNG, WebP, BMP, HEIC).', 'warning');
       return;
     }
 
-    showProgress('Cargando imágenes...', 'Preparando tus fotos para el documento PDF.');
+    const total = validImages.length;
+    const progressTitle = window.t ? window.t('progress_optimizing_title') : 'Optimizando imágenes para alto rendimiento...';
+    showProgress(progressTitle, `Comprimiendo y preparando imagen 1 de ${total}...`);
+
+    let loadedCount = 0;
+    let failedCount = 0;
 
     try {
-      for (let i = 0; i < validImages.length; i++) {
+      for (let i = 0; i < total; i++) {
         const file = validImages[i];
-        updateProgress(i + 1, validImages.length, Math.round(((i + 1) / validImages.length) * 100));
+        const pct = Math.round(((i) / total) * 100);
+        const descMsg = window.t 
+          ? window.t('progress_optimizing_desc', { current: i + 1, total: total })
+          : `Comprimiendo y preparando imagen ${i + 1} de ${total}...`;
 
-        const item = await createImageItem(file);
-        state.img2pdfItems.push(item);
+        updateProgress(pct, descMsg);
+
+        // Pequeña pausa asíncrona para ceder tiempo al recolector de basura (GC) y renderizado en iOS Safari
+        await new Promise(resolve => setTimeout(resolve, 25));
+
+        try {
+          const item = await processImageFileSafely(file);
+          state.img2pdfItems.push(item);
+          loadedCount++;
+        } catch (imgErr) {
+          console.warn(`Error procesando imagen ${file.name}:`, imgErr);
+          failedCount++;
+        }
       }
 
+      updateProgress(100);
+      await new Promise(resolve => setTimeout(resolve, 40));
+
       renderImagesGrid();
-      showToast(`${validImages.length} imagen(es) cargada(s) con éxito.`, 'success');
+
+      if (loadedCount > 0) {
+        const successMsg = window.t 
+          ? window.t('toast_images_optimized', { count: loadedCount })
+          : `${loadedCount} imagen(es) optimizada(s) y lista(s).`;
+        showToast(successMsg, 'success');
+      }
+      if (failedCount > 0) {
+        showToast(`${failedCount} imagen(es) no pudieron ser decodificadas.`, 'warning', 4000);
+      }
     } catch (err) {
       console.error('Error al cargar imágenes:', err);
-      showToast('Ocurrió un error al procesar algunas imágenes.', 'error');
+      showToast(window.t ? window.t('toast_images_process_error') : 'Ocurrió un error al procesar algunas imágenes.', 'error');
     } finally {
       hideProgress();
     }
   }
 
   /**
-   * Crea un objeto de imagen con soporte para recorte, rotación y renderizado
+   * Procesa, escala y comprime una imagen individual de forma segura y liviana.
+   * Evita picos de memoria RAM (OutOfMemory) en iPhone X / Safari.
    */
-  function createImageItem(file) {
+  function processImageFileSafely(file) {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const item = {
-            id: 'img_' + Math.random().toString(36).substr(2, 9),
-            file: file,
-            name: file.name,
-            size: file.size,
-            imgEl: img,
-            rotation: 0,
-            crop: null, // { x: 0..1, y: 0..1, width: 0..1, height: 0..1 }
-            getDataUrl: function(magicContrast = state.magicContrast) {
+      let objectUrl = null;
+      try {
+        objectUrl = URL.createObjectURL(file);
+      } catch (e) {
+        objectUrl = null;
+      }
+
+      const img = new Image();
+
+      const onImageLoaded = () => {
+        try {
+          const nw = img.naturalWidth || img.width;
+          const nh = img.naturalHeight || img.height;
+
+          if (!nw || !nh) {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            reject(new Error(`Dimensiones inválidas para ${file.name}`));
+            return;
+          }
+
+          // Escala óptima para PDF: máximo 2048px en su lado mayor (~300 DPI, nítido y ultraliviano)
+          const MAX_DIM = 2048;
+          let targetW = nw;
+          let targetH = nh;
+          if (Math.max(nw, nh) > MAX_DIM) {
+            const scale = MAX_DIM / Math.max(nw, nh);
+            targetW = Math.round(nw * scale);
+            targetH = Math.round(nh * scale);
+          }
+
+          // Canvas temporal para generar la imagen de trabajo optimizada
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+
+          const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.86);
+
+          // Generar miniatura base (~320px) para las tarjetas del grid (evita recalcular en cada preview)
+          const THUMB_DIM = 320;
+          let thumbW = targetW;
+          let thumbH = targetH;
+          if (Math.max(targetW, targetH) > THUMB_DIM) {
+            const tScale = THUMB_DIM / Math.max(targetW, targetH);
+            thumbW = Math.round(targetW * tScale);
+            thumbH = Math.round(targetH * tScale);
+          }
+          const thumbCanvas = document.createElement('canvas');
+          thumbCanvas.width = thumbW;
+          thumbCanvas.height = thumbH;
+          const tCtx = thumbCanvas.getContext('2d');
+          tCtx.drawImage(canvas, 0, 0, thumbW, thumbH);
+          const thumbBaseDataUrl = thumbCanvas.toDataURL('image/jpeg', 0.80);
+
+          // Limpiar inmediatamente recursos temporales de memoria
+          canvas.width = 1;
+          canvas.height = 1;
+          thumbCanvas.width = 1;
+          thumbCanvas.height = 1;
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+
+          // Cargar imagen optimizada
+          const optImg = new Image();
+          optImg.onload = () => {
+            const item = {
+              id: 'img_' + Math.random().toString(36).substr(2, 9),
+              file: file,
+              name: file.name,
+              size: Math.round(optimizedDataUrl.length * 0.75),
+              originalSize: file.size,
+              imgEl: optImg,
+              width: targetW,
+              height: targetH,
+              thumbBaseDataUrl: thumbBaseDataUrl,
+              rotation: 0,
+              crop: null, // { x: 0..1, y: 0..1, width: 0..1, height: 0..1 }
+
+              /**
+               * Obtiene miniatura rápida para la tarjeta del grid
+               */
+              getThumbnailUrl: function(magicContrast = state.magicContrast) {
+                const rot = (this.rotation || 0) % 360;
+                const crop = this.crop;
+                if (rot === 0 && !crop && !magicContrast) {
+                  return this.thumbBaseDataUrl;
+                }
+
+                const tCanvas = document.createElement('canvas');
+                const tCtx = tCanvas.getContext('2d', { willReadFrequently: true });
+                const c = crop || { x: 0, y: 0, width: 1, height: 1 };
+
+                const sx = Math.max(0, Math.round(c.x * targetW));
+                const sy = Math.max(0, Math.round(c.y * targetH));
+                const sw = Math.min(targetW - sx, Math.max(1, Math.round(c.width * targetW)));
+                const sh = Math.min(targetH - sy, Math.max(1, Math.round(c.height * targetH)));
+
+                let finalThumbW = thumbW;
+                let finalThumbH = Math.max(1, Math.round(thumbW * (sh / sw)));
+                if (finalThumbH > THUMB_DIM) {
+                  finalThumbH = THUMB_DIM;
+                  finalThumbW = Math.max(1, Math.round(THUMB_DIM * (sw / sh)));
+                }
+
+                if (rot === 90 || rot === 270) {
+                  tCanvas.width = finalThumbH;
+                  tCanvas.height = finalThumbW;
+                } else {
+                  tCanvas.width = finalThumbW;
+                  tCanvas.height = finalThumbH;
+                }
+
+                tCtx.save();
+                if (rot === 90) {
+                  tCtx.translate(tCanvas.width, 0);
+                  tCtx.rotate(Math.PI / 2);
+                } else if (rot === 180) {
+                  tCtx.translate(tCanvas.width, tCanvas.height);
+                  tCtx.rotate(Math.PI);
+                } else if (rot === 270) {
+                  tCtx.translate(0, tCanvas.height);
+                  tCtx.rotate((3 * Math.PI) / 2);
+                }
+
+                tCtx.drawImage(optImg, sx, sy, sw, sh, 0, 0, finalThumbW, finalThumbH);
+                tCtx.restore();
+
+                if (magicContrast) {
+                  applyMagicContrastEffect(tCtx, tCanvas.width, tCanvas.height);
+                }
+
+                const resThumb = tCanvas.toDataURL('image/jpeg', 0.82);
+                tCanvas.width = 1;
+                tCanvas.height = 1;
+                return resThumb;
+              },
+
+              /**
+               * Genera DataURL optimizado para exportación final al PDF
+               */
+              getDataUrl: function(magicContrast = state.magicContrast) {
+                const expCanvas = document.createElement('canvas');
+                const expCtx = expCanvas.getContext('2d', { willReadFrequently: true });
+                const nw = optImg.naturalWidth || targetW;
+                const nh = optImg.naturalHeight || targetH;
+
+                const crop = this.crop || { x: 0, y: 0, width: 1, height: 1 };
+                const sx = Math.max(0, Math.round(crop.x * nw));
+                const sy = Math.max(0, Math.round(crop.y * nh));
+                const sw = Math.min(nw - sx, Math.max(1, Math.round(crop.width * nw)));
+                const sh = Math.min(nh - sy, Math.max(1, Math.round(crop.height * nh)));
+
+                const rot = (this.rotation || 0) % 360;
+                if (rot === 90 || rot === 270) {
+                  expCanvas.width = sh;
+                  expCanvas.height = sw;
+                } else {
+                  expCanvas.width = sw;
+                  expCanvas.height = sh;
+                }
+
+                expCtx.save();
+                if (rot === 90) {
+                  expCtx.translate(expCanvas.width, 0);
+                  expCtx.rotate(Math.PI / 2);
+                } else if (rot === 180) {
+                  expCtx.translate(expCanvas.width, expCanvas.height);
+                  expCtx.rotate(Math.PI);
+                } else if (rot === 270) {
+                  expCtx.translate(0, expCanvas.height);
+                  expCtx.rotate((3 * Math.PI) / 2);
+                }
+
+                expCtx.drawImage(optImg, sx, sy, sw, sh, 0, 0, sw, sh);
+                expCtx.restore();
+
+                if (magicContrast) {
+                  applyMagicContrastEffect(expCtx, expCanvas.width, expCanvas.height);
+                }
+
+                const out = expCanvas.toDataURL('image/jpeg', 0.88);
+                expCanvas.width = 1;
+                expCanvas.height = 1;
+                return out;
+              }
+            };
+            resolve(item);
+          };
+
+          optImg.onerror = () => {
+            reject(new Error(`Error decodificando imagen optimizada: ${file.name}`));
+          };
+          optImg.src = optimizedDataUrl;
+        } catch (err) {
+          if (objectUrl) URL.revokeObjectURL(objectUrl);
+          reject(err);
+        }
+      };
+
+      img.onload = onImageLoaded;
+
+      img.onerror = () => {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        // Respaldo en FileReader por si objectUrl falla en navegadores específicos
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const fallbackImg = new Image();
+          fallbackImg.onload = () => {
+            try {
+              const nw = fallbackImg.naturalWidth;
+              const nh = fallbackImg.naturalHeight;
+              const MAX_DIM = 2048;
+              let targetW = nw;
+              let targetH = nh;
+              if (Math.max(nw, nh) > MAX_DIM) {
+                const scale = MAX_DIM / Math.max(nw, nh);
+                targetW = Math.round(nw * scale);
+                targetH = Math.round(nh * scale);
+              }
               const canvas = document.createElement('canvas');
+              canvas.width = targetW;
+              canvas.height = targetH;
               const ctx = canvas.getContext('2d');
-              const nw = img.naturalWidth;
-              const nh = img.naturalHeight;
+              ctx.drawImage(fallbackImg, 0, 0, targetW, targetH);
+              const optUrl = canvas.toDataURL('image/jpeg', 0.86);
+              canvas.width = 1;
+              canvas.height = 1;
 
-              const crop = this.crop || { x: 0, y: 0, width: 1, height: 1 };
-              const sx = Math.max(0, Math.round(crop.x * nw));
-              const sy = Math.max(0, Math.round(crop.y * nh));
-              const sw = Math.min(nw - sx, Math.max(1, Math.round(crop.width * nw)));
-              const sh = Math.min(nh - sy, Math.max(1, Math.round(crop.height * nh)));
-
-              const rot = (this.rotation || 0) % 360;
-              if (rot === 90 || rot === 270) {
-                canvas.width = sh;
-                canvas.height = sw;
-              } else {
-                canvas.width = sw;
-                canvas.height = sh;
-              }
-
-              ctx.save();
-              if (rot === 90) {
-                ctx.translate(canvas.width, 0);
-                ctx.rotate(Math.PI / 2);
-              } else if (rot === 180) {
-                ctx.translate(canvas.width, canvas.height);
-                ctx.rotate(Math.PI);
-              } else if (rot === 270) {
-                ctx.translate(0, canvas.height);
-                ctx.rotate((3 * Math.PI) / 2);
-              }
-
-              ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-              ctx.restore();
-
-              if (magicContrast) {
-                applyMagicContrastEffect(ctx, canvas.width, canvas.height);
-              }
-
-              return canvas.toDataURL('image/jpeg', 0.92);
+              const optImg = new Image();
+              optImg.onload = () => {
+                const item = {
+                  id: 'img_' + Math.random().toString(36).substr(2, 9),
+                  file: file,
+                  name: file.name,
+                  size: Math.round(optUrl.length * 0.75),
+                  originalSize: file.size,
+                  imgEl: optImg,
+                  width: targetW,
+                  height: targetH,
+                  thumbBaseDataUrl: optUrl,
+                  rotation: 0,
+                  crop: null,
+                  getThumbnailUrl: function() { return optUrl; },
+                  getDataUrl: function() { return optUrl; }
+                };
+                resolve(item);
+              };
+              optImg.src = optUrl;
+            } catch (err) {
+              reject(err);
             }
           };
-          resolve(item);
+          fallbackImg.onerror = () => reject(new Error(`No se pudo leer imagen: ${file.name}`));
+          fallbackImg.src = e.target.result;
         };
-        img.onerror = () => reject(new Error(`No se pudo cargar la imagen ${file.name}`));
-        img.src = e.target.result;
+        reader.onerror = () => reject(new Error(`Error al leer archivo: ${file.name}`));
+        reader.readAsDataURL(file);
       };
-      reader.onerror = () => reject(new Error(`Error de lectura en ${file.name}`));
-      reader.readAsDataURL(file);
+
+      if (objectUrl) {
+        img.src = objectUrl;
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => { img.src = e.target.result; };
+        reader.onerror = () => reject(new Error(`Error al leer archivo: ${file.name}`));
+        reader.readAsDataURL(file);
+      }
     });
   }
+
+  // Alias retrocompatible
+  const createImageItem = processImageFileSafely;
 
   /**
    * Renderiza la galería interactiva de imágenes
@@ -917,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const thumbImg = document.createElement('img');
       thumbImg.className = 'image-card-thumb';
       thumbImg.alt = `Página ${index + 1}`;
-      thumbImg.src = item.getDataUrl();
+      thumbImg.src = item.getThumbnailUrl();
 
       previewBox.appendChild(thumbImg);
 
@@ -974,7 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnRotate.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>`;
       btnRotate.addEventListener('click', () => {
         item.rotation = (item.rotation + 90) % 360;
-        thumbImg.src = item.getDataUrl();
+        thumbImg.src = item.getThumbnailUrl();
         showToast(`Página ${index + 1} rotada 90°.`, 'info', 2000);
       });
 
@@ -1368,7 +1609,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const pdfBlob = await PDFService.imagesToPDF(state.img2pdfItems, options, (current, total, pct) => {
-          updateProgress(current, total, pct);
+          const desc = window.t 
+            ? window.t('progress_pdf_page', { current, total })
+            : `Embedding page ${current} of ${total} into PDF...`;
+          updateProgress(pct, desc);
         });
 
         PDFService.downloadBlob(pdfBlob, fileName);

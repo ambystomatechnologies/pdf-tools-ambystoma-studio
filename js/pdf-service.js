@@ -370,6 +370,9 @@ const PDFService = (() => {
         width: drawWidth,
         height: drawHeight
       });
+
+      // Breve pausa asíncrona para que Safari / dispositivos móviles liberen memoria intermedia
+      await new Promise(resolve => setTimeout(resolve, 20));
     }
 
     if (onProgress) {
